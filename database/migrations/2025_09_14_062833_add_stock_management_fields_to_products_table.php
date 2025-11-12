@@ -1,0 +1,36 @@
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    /**
+     * Run the migrations.
+     */
+    public function up(): void
+    {
+        Schema::table('products', function (Blueprint $table) {
+            $table->integer('max_order_quantity')->default(999)->after('stock_quantity');
+            $table->integer('low_stock_threshold')->default(10)->after('max_order_quantity');
+            $table->boolean('track_stock')->default(true)->after('low_stock_threshold');
+            $table->integer('reserved_stock')->default(0)->after('track_stock');
+        });
+    }
+
+    /**
+     * Reverse the migrations.
+     */
+    public function down(): void
+    {
+        Schema::table('products', function (Blueprint $table) {
+            $table->dropColumn([
+                'max_order_quantity',
+                'low_stock_threshold',
+                'track_stock',
+                'reserved_stock'
+            ]);
+        });
+    }
+};

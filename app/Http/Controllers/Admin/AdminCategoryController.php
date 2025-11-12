@@ -1,0 +1,100 @@
+<?php
+
+namespace App\Http\Controllers\Admin;
+
+use App\Http\Controllers\Controller;
+use App\Models\Category;
+use Illuminate\Http\Request;
+use Inertia\Inertia;
+
+class AdminCategoryController extends Controller
+{
+    public function index()
+    {
+        $categories = Category::withCount('products')
+            ->latest()
+            ->paginate(10);
+
+        $stats = [
+            'total_categories' => Category::count(),
+            'active_categories' => Category::active()->count(),
+            'total_products' => Category::withCount('products')->get()->sum('products_count'),
+        ];
+
+        return Inertia::render('Admin/Categories/Index', [
+            'categories' => $categories,
+            'stats' => $stats,
+        ]);
+    }
+
+    public function create()
+    {
+        return Inertia::render('Admin/Categories/Create');
+    }
+
+    public function store(Request $request)
+    {
+        $validated = $request->validate([
+            'name' => 'required|string|max:255|unique:categories',
+            'description' => 'nullable|string',
+            'is_active' => 'boolean',
+        ]);
+
+        Category::create($validated);
+
+        return redirect()->route('admin.categories.index')
+            ->with('success', 'Category created successfully.');
+    }
+
+    public function show(Category $category)
+    {
+        $category->load('products');
+
+        return Inertia::render('Admin/Categories/Show', [
+            'category' => $category,
+        ]);
+    }
+
+    public function edit(Category $category)
+    {
+        return Inertia::render('Admin/Categories/Edit', [
+            'category' => $category,
+        ]);
+    }
+
+    public function update(Request $request, Category $category)
+    {
+        $validated = $request->validate([
+            'name' => 'required|string|max:255|unique:categories,name,' . $category->id,
+            'description' => 'nullable|string',
+            'is_active' => 'boolean',
+        ]);
+
+        $category->update($validated);
+
+        return redirect()->route('admin.categories.index')
+            ->with('success', 'Category updated successfully.');
+    }
+
+    public function destroy(Category $category)
+    {
+        // Check if category has products
+        if ($category->products()->count() > 0) {
+            return back()->with('error', 'Cannot delete category with existing products.');
+        }
+
+        $category->delete();
+
+        return redirect()->route('admin.categories.index')
+            ->with('success', 'Category deleted successfully.');
+    }
+
+    public function toggleActive(Category $category)
+    {
+        $category->update([
+            'is_active' => !$category->is_active
+        ]);
+
+        return back()->with('success', 'Category status updated.');
+    }
+}

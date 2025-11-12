@@ -1,0 +1,125 @@
+<?php
+
+use App\Http\Controllers\CategoryController;
+use App\Http\Controllers\OrderController;
+use App\Http\Controllers\ProductController;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Route;
+use Inertia\Inertia;
+
+// Public routes
+Route::get('/', [ProductController::class, 'home'])->name('home');
+Route::get('/products', [ProductController::class, 'catalog'])->name('products.index');
+Route::get('/products/{product}', [ProductController::class, 'show'])->name('products.show');
+Route::get('/categories', [CategoryController::class, 'index'])->name('categories.index');
+
+// Cart API routes (uses session, so must be in web.php)
+Route::prefix('api/cart')->group(function () {
+    Route::get('/', [\App\Http\Controllers\Api\CartController::class, 'index']);
+    Route::post('/', [\App\Http\Controllers\Api\CartController::class, 'store']);
+    Route::put('/{productId}', [\App\Http\Controllers\Api\CartController::class, 'update']);
+    Route::delete('/{productId}', [\App\Http\Controllers\Api\CartController::class, 'destroy']);
+    Route::delete('/', [\App\Http\Controllers\Api\CartController::class, 'clear']);
+    Route::post('/sync-guest', [\App\Http\Controllers\Api\CartController::class, 'syncGuestCart']);
+});
+
+// Notification API routes (authenticated users only)
+Route::prefix('api/notifications')->middleware(['web', 'auth'])->group(function () {
+    Route::get('/', [\App\Http\Controllers\Api\NotificationController::class, 'index']);
+    Route::patch('/{id}/read', [\App\Http\Controllers\Api\NotificationController::class, 'markAsRead']);
+    Route::patch('/mark-all-read', [\App\Http\Controllers\Api\NotificationController::class, 'markAllAsRead']);
+    Route::delete('/{id}', [\App\Http\Controllers\Api\NotificationController::class, 'destroy']);
+});
+
+// Dashboard route for authenticated users
+Route::get('/dashboard', function () {
+    $user = Auth::user();
+    
+    if ($user && $user->isAdmin()) {
+        return redirect()->route('admin.dashboard');
+    }
+    
+    return redirect()->route('home');
+})->middleware(['auth', 'verified'])->name('dashboard');
+
+// Guest checkout routes
+Route::get('/checkout', [OrderController::class, 'create'])->name('checkout');
+Route::post('/checkout', [OrderController::class, 'create'])->name('checkout.post');
+Route::post('/orders', [OrderController::class, 'store'])->name('orders.store');
+
+// Guest order tracking
+Route::get('/track-order', [OrderController::class, 'trackOrderForm'])->name('orders.track');
+Route::post('/track-order', [OrderController::class, 'trackOrder'])->name('orders.track.submit');
+
+// Customer routes (authenticated)
+Route::middleware(['auth', 'verified'])->group(function () {
+    Route::get('/orders/{order}', [OrderController::class, 'show'])->name('orders.show');
+    Route::get('/my-orders', [OrderController::class, 'customerOrders'])->name('orders.customer');
+    Route::post('/orders/{order}/reorder', [OrderController::class, 'reorder'])->name('orders.reorder');
+    Route::patch('/orders/{order}/cancel', [OrderController::class, 'cancel'])->name('orders.cancel');
+    
+    // Bulk orders for wholesalers
+    Route::get('/bulk-order', [OrderController::class, 'bulkOrderForm'])
+        ->middleware('role:wholesaler,admin')
+        ->name('orders.bulk');
+});
+
+// Admin Dashboard routes
+Route::middleware(['auth', 'verified', 'admin'])->prefix('admin')->name('admin.')->group(function () {
+    Route::get('/dashboard', [\App\Http\Controllers\Admin\AdminDashboardController::class, 'index'])
+        ->name('dashboard');
+    
+    // Order Management
+    Route::get('/orders', [OrderController::class, 'index'])->name('orders.index');
+    Route::patch('/orders/{order}/status', [OrderController::class, 'updateStatus'])->name('orders.update-status');
+    Route::patch('/orders/{order}/approve-payment', [OrderController::class, 'approvePayment'])->name('orders.approve-payment');
+    Route::patch('/orders/{order}/reject-payment', [OrderController::class, 'rejectPayment'])->name('orders.reject-payment');
+    Route::get('/orders/{order}/payment-proof', [OrderController::class, 'viewPaymentProof'])->name('orders.payment-proof');
+    
+    // Order Export & Reports
+    Route::get('/orders/export', [OrderController::class, 'exportOrders'])->name('orders.export');
+    Route::get('/orders/{order}/invoice', [OrderController::class, 'generateInvoice'])->name('orders.invoice');
+    
+    // Product Management
+    Route::resource('products', \App\Http\Controllers\Admin\AdminProductController::class);
+    Route::patch('/products/{product}/toggle-best-selling', [\App\Http\Controllers\Admin\AdminProductController::class, 'toggleBestSelling'])
+        ->name('products.toggle-best-selling');
+    Route::patch('/products/{product}/toggle-active', [\App\Http\Controllers\Admin\AdminProductController::class, 'toggleActive'])
+        ->name('products.toggle-active');
+    
+    // Stock Management
+    Route::get('/products/low-stock', [\App\Http\Controllers\Admin\AdminProductController::class, 'lowStock'])->name('admin.products.low-stock');
+    Route::patch('/products/{product}/adjust-stock', [\App\Http\Controllers\Admin\AdminProductController::class, 'adjustStock'])->name('admin.products.adjust-stock');
+    Route::patch('/products/bulk-update-stock', [\App\Http\Controllers\Admin\AdminProductController::class, 'bulkUpdateStock'])->name('admin.products.bulk-update-stock');
+    
+    // Category Management
+    Route::resource('categories', \App\Http\Controllers\Admin\AdminCategoryController::class);
+    Route::patch('/categories/{category}/toggle-active', [\App\Http\Controllers\Admin\AdminCategoryController::class, 'toggleActive'])
+        ->name('categories.toggle-active');
+    
+    // Payment Settings Management
+    Route::get('/payment-settings', [\App\Http\Controllers\Admin\PaymentSettingController::class, 'index'])
+        ->name('payment-settings.index');
+    Route::post('/payment-settings', [\App\Http\Controllers\Admin\PaymentSettingController::class, 'store'])
+        ->name('payment-settings.store');
+    Route::put('/payment-settings/{paymentSetting}', [\App\Http\Controllers\Admin\PaymentSettingController::class, 'update'])
+        ->name('payment-settings.update');
+    Route::delete('/payment-settings/{paymentSetting}', [\App\Http\Controllers\Admin\PaymentSettingController::class, 'destroy'])
+        ->name('payment-settings.destroy');
+    Route::patch('/payment-settings/{paymentSetting}/toggle-active', [\App\Http\Controllers\Admin\PaymentSettingController::class, 'toggleActive'])
+        ->name('payment-settings.toggle-active');
+});
+
+require __DIR__.'/settings.php';
+require __DIR__.'/auth.php';
+
+// Social Authentication Routes
+Route::prefix('auth')->group(function () {
+    Route::get('/{provider}', [\App\Http\Controllers\Auth\SocialAuthController::class, 'redirect'])
+        ->where('provider', 'facebook|google')
+        ->name('social.redirect');
+    
+    Route::get('/{provider}/callback', [\App\Http\Controllers\Auth\SocialAuthController::class, 'callback'])
+        ->where('provider', 'facebook|google')
+        ->name('social.callback');
+});
