@@ -1,10 +1,11 @@
 #!/bin/bash
 
-echo "=== Starting RovicApp ==="
+echo "=== Starting Simple Static Server ==="
 
-# Ensure PHP is available
-php --version
+# Install a simple HTTP server
+npm install -g http-server
 
-# Start Laravel server
-echo "Starting Laravel on port $PORT"
-php artisan serve --host=0.0.0.0 --port=$PORT
+# Serve the built assets
+echo "Starting static server on port $PORT"
+cd public
+http-server -p $PORT -a 0.0.0.0
