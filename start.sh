@@ -9,11 +9,11 @@ sleep 5
 if [ ! -z "$DATABASE_URL" ]; then
     echo "Parsing DATABASE_URL..."
     
-    # Extract components from postgresql://user:pass@host:port/database
+    # Extract components from postgresql://user:pass@host[:port]/database
     DB_USER=$(echo $DATABASE_URL | sed 's/postgresql:\/\/\([^:]*\):.*/\1/')
     DB_PASS=$(echo $DATABASE_URL | sed 's/postgresql:\/\/[^:]*:\([^@]*\)@.*/\1/')
-    DB_HOST=$(echo $DATABASE_URL | sed 's/.*@\([^:]*\):.*/\1/')
-    DB_PORT=$(echo $DATABASE_URL | sed 's/.*:\([0-9]*\)\/.*/\1/')
+    DB_HOST=$(echo $DATABASE_URL | sed 's/.*@\([^:\/]*\).*/\1/')
+    DB_PORT=$(echo $DATABASE_URL | grep -o ':[0-9]\+/' | sed 's/[:\/]//g' || echo "5432")
     DB_NAME=$(echo $DATABASE_URL | sed 's/.*\/\([^?]*\).*/\1/')
     
     # Set environment variables for Laravel
