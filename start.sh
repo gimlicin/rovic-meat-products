@@ -5,18 +5,33 @@ echo "Starting RovicApp with database setup..."
 # Wait a moment for services to be ready
 sleep 5
 
-# Debug environment variables
-echo "=== Environment Debug ==="
-echo "DATABASE_URL: ${DATABASE_URL:-NOT_SET}"
-echo "DB_CONNECTION: ${DB_CONNECTION:-NOT_SET}"
-echo "DB_HOST: ${DB_HOST:-NOT_SET}"
-echo "DB_DATABASE: ${DB_DATABASE:-NOT_SET}"
-echo "========================="
-
-# Run database setup if DATABASE_URL is available
+# Parse DATABASE_URL if available
 if [ ! -z "$DATABASE_URL" ]; then
+    echo "Parsing DATABASE_URL..."
+    
+    # Extract components from postgresql://user:pass@host:port/database
+    DB_USER=$(echo $DATABASE_URL | sed 's/postgresql:\/\/\([^:]*\):.*/\1/')
+    DB_PASS=$(echo $DATABASE_URL | sed 's/postgresql:\/\/[^:]*:\([^@]*\)@.*/\1/')
+    DB_HOST=$(echo $DATABASE_URL | sed 's/postgresql:\/\/[^@]*@\([^:]*\):.*/\1/')
+    DB_PORT=$(echo $DATABASE_URL | sed 's/postgresql:\/\/[^@]*@[^:]*:\([^\/]*\)\/.*/\1/')
+    DB_NAME=$(echo $DATABASE_URL | sed 's/postgresql:\/\/[^\/]*\/\(.*\)/\1/')
+    
+    # Set environment variables for Laravel
+    export DB_CONNECTION=pgsql
+    export DB_HOST=$DB_HOST
+    export DB_PORT=$DB_PORT
+    export DB_DATABASE=$DB_NAME
+    export DB_USERNAME=$DB_USER
+    export DB_PASSWORD=$DB_PASS
+    
+    echo "=== Parsed Database Config ==="
+    echo "DB_HOST: $DB_HOST"
+    echo "DB_PORT: $DB_PORT" 
+    echo "DB_DATABASE: $DB_NAME"
+    echo "DB_USERNAME: $DB_USER"
+    echo "=============================="
+    
     echo "Database URL found, running setup..."
-    echo "Full DATABASE_URL: $DATABASE_URL"
     php artisan migrate --force || echo "Migration skipped"
     php artisan db:seed --force || echo "Seeding skipped" 
     php artisan storage:link || echo "Storage link skipped"
