@@ -1,7 +1,7 @@
 import { Head, useForm } from '@inertiajs/react';
 import { LoaderCircle } from 'lucide-react';
 import { FormEventHandler } from 'react';
-import { route } from 'ziggy-js';
+const route = (window as any).route || ((name: string) => name);
 
 import InputError from '@/components/input-error';
 import TextLink from '@/components/text-link';

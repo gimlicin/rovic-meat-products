@@ -4,7 +4,7 @@ import { useMobileNavigation } from '@/hooks/use-mobile-navigation';
 import { type User } from '@/types';
 import { Link, router } from '@inertiajs/react';
 import { LogOut, Settings } from 'lucide-react';
-import { route } from 'ziggy-js';
+const route = (window as any).route || ((name: string) => name);
 
 interface UserMenuContentProps {
     user: User;

@@ -2,7 +2,7 @@ import React from 'react';
 import { X, Plus, Minus, ShoppingBag, Trash2 } from 'lucide-react';
 import { useCart } from '@/contexts/CartContext';
 import { Link, router } from '@inertiajs/react';
-import { route } from 'ziggy-js';
+const route = (window as any).route || ((name: string) => name);
 import axios from 'axios';
 
 export default function CartSidebar() {
