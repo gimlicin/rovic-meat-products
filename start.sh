@@ -13,7 +13,12 @@ if [ ! -z "$DATABASE_URL" ]; then
     DB_USER=$(echo $DATABASE_URL | sed 's/postgresql:\/\/\([^:]*\):.*/\1/')
     DB_PASS=$(echo $DATABASE_URL | sed 's/postgresql:\/\/[^:]*:\([^@]*\)@.*/\1/')
     DB_HOST=$(echo $DATABASE_URL | sed 's/.*@\([^:\/]*\).*/\1/')
-    DB_PORT=$(echo $DATABASE_URL | grep -o ':[0-9]\+/' | sed 's/[:\/]//g' || echo "5432")
+    # Extract port or default to 5432
+    if echo $DATABASE_URL | grep -q ':[0-9]\+/'; then
+        DB_PORT=$(echo $DATABASE_URL | grep -o ':[0-9]\+/' | sed 's/[:\/]//g')
+    else
+        DB_PORT="5432"
+    fi
     DB_NAME=$(echo $DATABASE_URL | sed 's/.*\/\([^?]*\).*/\1/')
     
     # Set environment variables for Laravel
