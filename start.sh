@@ -5,9 +5,18 @@ echo "Starting RovicApp with database setup..."
 # Wait a moment for services to be ready
 sleep 5
 
+# Debug environment variables
+echo "=== Environment Debug ==="
+echo "DATABASE_URL: ${DATABASE_URL:-NOT_SET}"
+echo "DB_CONNECTION: ${DB_CONNECTION:-NOT_SET}"
+echo "DB_HOST: ${DB_HOST:-NOT_SET}"
+echo "DB_DATABASE: ${DB_DATABASE:-NOT_SET}"
+echo "========================="
+
 # Run database setup if DATABASE_URL is available
 if [ ! -z "$DATABASE_URL" ]; then
     echo "Database URL found, running setup..."
+    echo "Full DATABASE_URL: $DATABASE_URL"
     php artisan migrate --force || echo "Migration skipped"
     php artisan db:seed --force || echo "Seeding skipped" 
     php artisan storage:link || echo "Storage link skipped"
