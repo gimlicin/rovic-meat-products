@@ -827,12 +827,30 @@ function OrdersIndex({ orders, filters }: Props) {
             showActions={selectedOrder?.payment_status === 'submitted'}
             onApprove={
               selectedOrder?.payment_status === 'submitted'
-                ? () => approvePayment(lightboxImage.orderId)
+                ? () => {
+                    router.patch(`/admin/orders/${lightboxImage.orderId}/approve-payment`, {}, {
+                      onSuccess: () => {
+                        setOrderDetailOpen(false);
+                        window.location.reload(); // Quick refresh for demo
+                      }
+                    });
+                  }
                 : undefined
             }
             onReject={
               selectedOrder?.payment_status === 'submitted'
-                ? () => rejectPayment(lightboxImage.orderId)
+                ? () => {
+                    const reason = prompt('Rejection reason:') || 'Payment verification failed';
+                    router.patch(`/admin/orders/${lightboxImage.orderId}/reject-payment`, 
+                      { rejection_reason: reason }, 
+                      {
+                        onSuccess: () => {
+                          setOrderDetailOpen(false);
+                          window.location.reload(); // Quick refresh for demo
+                        }
+                      }
+                    );
+                  }
                 : undefined
             }
           />
