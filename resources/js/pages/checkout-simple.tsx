@@ -113,6 +113,11 @@ export default function CheckoutSimple({ cartItems, total, paymentSettings = [] 
             preserveScroll: true,
             onError: (errors) => {
                 console.error('Order submission errors:', errors);
+                // Display error to user
+                alert('Order submission failed: ' + JSON.stringify(errors, null, 2));
+            },
+            onSuccess: (response) => {
+                console.log('Order submitted successfully:', response);
             }
         });
     };

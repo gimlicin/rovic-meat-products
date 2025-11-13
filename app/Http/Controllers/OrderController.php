@@ -345,9 +345,12 @@ class OrderController extends Controller
                 'order_data' => $validated ?? []
             ]);
             
-            // Redirect to home with error message for better debugging
-            return redirect()->route('home')
-                ->with('error', 'Order creation failed: ' . $e->getMessage());
+            // For debugging: add the error to the response directly
+            return response()->json([
+                'error' => true,
+                'message' => 'Order creation failed: ' . $e->getMessage(),
+                'details' => $e->getTraceAsString()
+            ], 422);
         }
     }
 
