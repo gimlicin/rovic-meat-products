@@ -161,7 +161,16 @@ class OrderController extends Controller
      */
     public function store(StoreOrderRequest $request)
     {
+        \Log::info('Order submission attempt', [
+            'user_id' => auth()->id(),
+            'request_data' => $request->all()
+        ]);
+        
         $validated = $request->validated();
+        
+        \Log::info('Order validation passed', [
+            'validated_data' => $validated
+        ]);
 
         DB::beginTransaction();
 
@@ -270,8 +279,6 @@ class OrderController extends Controller
                 $order->orderItems()->create($itemData);
             }
 
-            DB::commit();
-
             // Clear the cart after successful order
             if (auth()->check()) {
                 // Clear authenticated user's cart
@@ -315,11 +322,18 @@ class OrderController extends Controller
                 ]);
             }
 
-            // Show order confirmation page for both authenticated and guest users
-            return Inertia::render('order-confirmation', [
-                'order' => $order->load('orderItems.product'),
-                'success' => 'Order placed successfully!'
+            \Log::info('Order created successfully', [
+                'order_id' => $order->id,
+                'user_id' => auth()->id(),
+                'total_amount' => $order->total_amount
             ]);
+
+            // Commit the transaction
+            DB::commit();
+
+            // Redirect to a GET route that shows the confirmation
+            return redirect()->route('order.confirmation', ['order' => $order->id])
+                ->with('success', 'Order placed successfully!');
 
         } catch (\Exception $e) {
             DB::rollback();
@@ -333,6 +347,25 @@ class OrderController extends Controller
             return redirect()->back()
                 ->with('error', $e->getMessage());
         }
+    }
+
+    /**
+     * Display order confirmation page (for both authenticated and guest users)
+     */
+    public function confirmation(Order $order)
+    {
+        // Load related data
+        $order->load(['orderItems.product']);
+        
+        \Log::info('Order confirmation page accessed', [
+            'order_id' => $order->id,
+            'user_id' => auth()->id()
+        ]);
+
+        return Inertia::render('order-confirmation', [
+            'order' => $order,
+            'success' => session('success', 'Order placed successfully!')
+        ]);
     }
 
     /**

@@ -47,6 +47,9 @@ Route::get('/checkout', [OrderController::class, 'create'])->name('checkout');
 Route::post('/checkout', [OrderController::class, 'create'])->name('checkout.post');
 Route::post('/orders', [OrderController::class, 'store'])->name('orders.store');
 
+// Order confirmation (accessible to both authenticated and guest users)
+Route::get('/order-confirmation/{order}', [OrderController::class, 'confirmation'])->name('order.confirmation');
+
 // Guest order tracking
 Route::get('/track-order', [OrderController::class, 'trackOrderForm'])->name('orders.track');
 Route::post('/track-order', [OrderController::class, 'trackOrder'])->name('orders.track.submit');
