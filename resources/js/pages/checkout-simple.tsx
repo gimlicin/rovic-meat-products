@@ -216,7 +216,10 @@ export default function CheckoutSimple({ cartItems, total, paymentSettings = [] 
                                                             name="payment_method"
                                                             value={setting.id}
                                                             checked={selectedPaymentMethod === setting.id}
-                                                            onChange={() => setSelectedPaymentMethod(setting.id)}
+                                                            onChange={() => {
+                                                                setSelectedPaymentMethod(setting.id);
+                                                                setData('payment_method', setting.payment_method);
+                                                            }}
                                                             className="mr-3 h-5 w-5 text-orange-600"
                                                         />
                                                         <span className="text-base font-medium">
@@ -302,30 +305,47 @@ export default function CheckoutSimple({ cartItems, total, paymentSettings = [] 
                                     </div>
                                 )}
                                 
-                                {/* Payment Proof Upload */}
-                                <div className="p-5 border-2 border-dashed border-gray-300 rounded-lg bg-gray-50">
-                                    <label className="block text-base font-semibold mb-2 flex items-center gap-2">
-                                        📤 Upload Payment Proof *
-                                    </label>
-                                    <p className="text-sm text-gray-600 mb-3">
-                                        Please upload a screenshot or photo of your payment confirmation
-                                    </p>
-                                    <input
-                                        type="file"
-                                        accept="image/*"
-                                        onChange={handlePaymentProofChange}
-                                        className="w-full text-sm p-3 border rounded-lg bg-white"
-                                    />
-                                    {errors.payment_proof && (
-                                        <p className="text-red-500 text-sm mt-2">{errors.payment_proof}</p>
-                                    )}
-                                    {paymentProof && (
-                                        <p className="text-green-600 text-sm mt-2 font-medium">✓ {paymentProof.name}</p>
-                                    )}
-                                </div>
+                                {/* Payment Proof Upload - Only show for QR payments */}
+                                {data.payment_method === 'qr' && (
+                                    <div className="p-5 border-2 border-dashed border-gray-300 rounded-lg bg-gray-50">
+                                        <label className="block text-base font-semibold mb-2 flex items-center gap-2">
+                                            📤 Upload Payment Proof *
+                                        </label>
+                                        <p className="text-sm text-gray-600 mb-3">
+                                            Please upload a screenshot or photo of your payment confirmation
+                                        </p>
+                                        <input
+                                            type="file"
+                                            accept="image/*"
+                                            onChange={handlePaymentProofChange}
+                                            className="w-full text-sm p-3 border rounded-lg bg-white"
+                                        />
+                                        {errors.payment_proof && (
+                                            <p className="text-red-500 text-sm mt-1">{errors.payment_proof}</p>
+                                        )}
+                                        {paymentProof && (
+                                            <p className="text-green-600 text-sm mt-2 flex items-center gap-1">
+                                                ✓ {paymentProof.name}
+                                            </p>
+                                        )}
+                                    </div>
+                                )}
+                                
+                                {/* Cash Payment Message */}
+                                {data.payment_method === 'cash' && (
+                                    <div className="p-5 border-2 border-green-300 rounded-lg bg-green-50">
+                                        <div className="flex items-center gap-3">
+                                            <span className="text-3xl">💰</span>
+                                            <div>
+                                                <h4 className="font-semibold text-green-800">Cash Payment Selected</h4>
+                                                <p className="text-sm text-green-700">Payment will be collected upon pickup/delivery</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                )}
                             </div>
                         </div>
-
+                        
                         {/* Customer Form */}
                         <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
                             <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
