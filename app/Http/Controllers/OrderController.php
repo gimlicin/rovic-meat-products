@@ -340,12 +340,14 @@ class OrderController extends Controller
             
             \Log::error('Order creation failed', [
                 'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
                 'user_id' => auth()->id(),
                 'order_data' => $validated ?? []
             ]);
             
-            return redirect()->back()
-                ->with('error', $e->getMessage());
+            // Redirect to home with error message for better debugging
+            return redirect()->route('home')
+                ->with('error', 'Order creation failed: ' . $e->getMessage());
         }
     }
 
