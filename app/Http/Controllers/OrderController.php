@@ -186,17 +186,6 @@ class OrderController extends Controller
             return redirect()->back()->withErrors(['database' => 'Database connection failed'])->withInput();
         }
 
-        // Handle payment proof upload
-        $paymentProofPath = null;
-        if ($request->hasFile('payment_proof')) {
-            try {
-                $paymentProofPath = $request->file('payment_proof')->store('payment-proofs', 'public');
-                \Log::info('✅ Payment proof uploaded', ['path' => $paymentProofPath]);
-            } catch (\Exception $e) {
-                \Log::error('❌ Payment proof upload failed', ['error' => $e->getMessage()]);
-            }
-        }
-
         // Calculate real cart total (copy logic from create method)
         $total = 0;
         $processedItems = [];
@@ -224,37 +213,18 @@ class OrderController extends Controller
 
         // Use real cart total instead of fixed amount
         try {
-            \Log::info('Creating order with real cart total', [
-                'total' => $total, 
-                'has_payment_proof' => $paymentProofPath !== null,
-                'payment_proof_path' => $paymentProofPath
-            ]);
+            \Log::info('Creating order with real cart total', ['total' => $total]);
             
-            // Determine payment method and status based on payment proof
-            $paymentMethod = $paymentProofPath ? Order::PAYMENT_QR : Order::PAYMENT_CASH;
-            $paymentStatus = $paymentProofPath ? Order::PAYMENT_STATUS_SUBMITTED : Order::PAYMENT_STATUS_PENDING;
-            $orderStatus = $paymentProofPath ? Order::STATUS_PAYMENT_SUBMITTED : Order::STATUS_PENDING;
-
-            // Validate required fields
-            if (empty($request->input('customer_name'))) {
-                throw new \Exception('Customer name is required');
-            }
-            if (empty($request->input('customer_phone'))) {
-                throw new \Exception('Customer phone is required');
-            }
-
-            // Create order with calculated total
+            // Create order with calculated total (SIMPLE VERSION - NO PAYMENT PROOF YET)
             $order = Order::create([
                 'customer_name' => $request->input('customer_name', 'Order Customer'),
                 'customer_phone' => $request->input('customer_phone', '09123456789'),
                 'customer_email' => $request->input('customer_email'),
-                'status' => $orderStatus,
+                'status' => Order::STATUS_PENDING,
                 'total_amount' => $total > 0 ? $total : 100.00, // Use real total or fallback
-                'pickup_or_delivery' => $request->input('pickup_or_delivery', Order::PICKUP),
-                'payment_method' => $paymentMethod,
-                'payment_status' => $paymentStatus,
-                'payment_proof_path' => $paymentProofPath, // Store payment proof path
-                'notes' => $request->input('notes', ''),
+                'pickup_or_delivery' => Order::PICKUP,
+                'payment_method' => Order::PAYMENT_CASH, // Use proper constant
+                'payment_status' => Order::PAYMENT_STATUS_PENDING
             ]);
             
             \Log::info('✅ Order created successfully', ['order_id' => $order->id]);
