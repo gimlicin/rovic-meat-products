@@ -113,11 +113,22 @@ export default function CheckoutSimple({ cartItems, total, paymentSettings = [] 
             preserveScroll: true,
             onError: (errors) => {
                 console.error('Order submission errors:', errors);
-                // Display error to user
-                alert('Order submission failed: ' + JSON.stringify(errors, null, 2));
+                // More professional error handling
+                const errorMsg = typeof errors === 'object' && errors.message 
+                    ? errors.message 
+                    : 'Unable to process your order. Please check your information and try again.';
+                alert('❌ Order Failed: ' + errorMsg);
             },
-            onSuccess: (response) => {
+            onSuccess: async (response) => {
                 console.log('Order submitted successfully:', response);
+                
+                // Clear cart after successful order
+                try {
+                    await axios.delete('/api/cart');
+                    console.log('Cart cleared successfully');
+                } catch (error) {
+                    console.warn('Failed to clear cart:', error);
+                }
             }
         });
     };
@@ -563,7 +574,7 @@ export default function CheckoutSimple({ cartItems, total, paymentSettings = [] 
                                     disabled={processing || ((data.payment_method === 'qr' || data.payment_method === 'gcash') && !paymentProof) || !data.terms_accepted}
                                     className="w-full bg-red-600 text-white py-4 px-6 rounded-lg font-semibold hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed text-base transition-colors shadow-md"
                                 >
-                                    {processing ? 'Processing Order...' : 'Place Order'}
+                                    {processing ? '⏳ Processing Your Order...' : '🛒 Place Order'}
                                 </button>
                                 
                                 {(((data.payment_method === 'qr' || data.payment_method === 'gcash') && !paymentProof) || !data.terms_accepted) && (
