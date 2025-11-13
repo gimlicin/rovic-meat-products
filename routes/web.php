@@ -116,6 +116,29 @@ Route::middleware(['auth', 'verified', 'admin'])->prefix('admin')->name('admin.'
 require __DIR__.'/settings.php';
 require __DIR__.'/auth.php';
 
+// EMERGENCY MINIMAL ORDER TEST - REMOVE AFTER FIXING
+Route::post('/test-simple-order', function(Request $request) {
+    \Log::info('=== MINIMAL ORDER TEST ===');
+    try {
+        $order = \App\Models\Order::create([
+            'customer_name' => 'Test Customer',
+            'customer_phone' => '09123456789',
+            'status' => 'pending',
+            'total_amount' => 999.99,
+            'pickup_or_delivery' => 'pickup',
+            'payment_method' => 'cash',
+            'payment_status' => 'pending'
+        ]);
+        
+        \Log::info('✅ Minimal order created', ['order_id' => $order->id]);
+        return redirect('/order-confirmation/' . $order->id)->with('success', 'Test order created!');
+        
+    } catch (\Exception $e) {
+        \Log::error('❌ Minimal order failed', ['error' => $e->getMessage()]);
+        return back()->withErrors(['error' => $e->getMessage()]);
+    }
+});
+
 // EMERGENCY DEBUG ROUTES - REMOVE AFTER FIXING
 Route::get('/debug-db', function() {
     try {

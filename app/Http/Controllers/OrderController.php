@@ -163,18 +163,35 @@ class OrderController extends Controller
     {
         \Log::info('=== ORDER SUBMISSION START ===', [
             'user_id' => auth()->id(),
-            'has_payment_proof' => $request->hasFile('payment_proof')
+            'has_payment_proof' => $request->hasFile('payment_proof'),
+            'request_method' => $request->method(),
+            'request_url' => $request->fullUrl()
         ]);
         
+        // Validate first - this might be failing
         try {
             $validated = $request->validated();
-            \Log::info('Validation passed', ['cart_items_count' => count($validated['cart_items'])]);
-            
-            // Test database connection
+            \Log::info('✅ Validation passed', ['cart_items_count' => count($validated['cart_items'])]);
+        } catch (\Exception $e) {
+            \Log::error('❌ Validation failed', [
+                'error' => $e->getMessage(),
+                'validation_errors' => $e instanceof \Illuminate\Validation\ValidationException ? $e->errors() : 'N/A'
+            ]);
+            return redirect()->back()->withErrors(['validation' => $e->getMessage()])->withInput();
+        }
+
+        // Test database connection
+        try {
             DB::select('SELECT 1 as test');
-            \Log::info('Database connection OK');
-            
+            \Log::info('✅ Database connection OK');
+        } catch (\Exception $e) {
+            \Log::error('❌ Database connection failed', ['error' => $e->getMessage()]);
+            return redirect()->back()->withErrors(['database' => 'Database connection failed'])->withInput();
+        }
+
+        try {
             DB::beginTransaction();
+            \Log::info('✅ Transaction started');
             // SIMPLIFIED ORDER CREATION FOR TESTING
             $totalPrice = 0;
             foreach ($validated['cart_items'] as $item) {
@@ -242,12 +259,14 @@ class OrderController extends Controller
                 throw new \Exception('Order verification failed');
             }
             
-            \Log::info('Redirecting to confirmation', [
+            \Log::info('✅ SUCCESS - Redirecting to confirmation', [
                 'order_id' => $order->id,
-                'route' => route('order.confirmation', $order)
+                'route' => route('order.confirmation', $order),
+                'order_data' => $order->toArray()
             ]);
             
-            return redirect()->route('order.confirmation', $order)
+            // Force a specific redirect to test
+            return redirect('/order-confirmation/' . $order->id)
                 ->with('success', 'Order placed successfully!');
                 
         } catch (\Exception $e) {
