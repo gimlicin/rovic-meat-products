@@ -107,8 +107,8 @@ export default function CheckoutSimple({ cartItems, total, paymentSettings = [] 
             _token: props.csrf_token || document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '', // Fresh CSRF token from Inertia props
         };
         
-        // Back to original route
-        router.post('/orders', submitData, {
+        // ULTRA SIMPLE TEST - should work 100%
+        router.post('/ultra-simple-order', submitData, {
             forceFormData: true,
             preserveScroll: true,
             onError: (errors) => {

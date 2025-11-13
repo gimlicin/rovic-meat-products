@@ -116,31 +116,30 @@ Route::middleware(['auth', 'verified', 'admin'])->prefix('admin')->name('admin.'
 require __DIR__.'/settings.php';
 require __DIR__.'/auth.php';
 
-// BYPASS VALIDATION TEST - REMOVE AFTER FIXING  
-Route::post('/bypass-order-validation', function(Request $request) {
-    \Log::info('=== BYPASS VALIDATION TEST ===', [
-        'request_data' => $request->all()
-    ]);
+// ULTRA SIMPLE ORDER TEST - REMOVE AFTER FIXING  
+Route::post('/ultra-simple-order', function(Request $request) {
+    \Log::info('=== ULTRA SIMPLE ORDER TEST ===');
     
     try {
-        // Simulate real order data from your form submission
+        // Create the most basic order possible
         $order = \App\Models\Order::create([
-            'customer_name' => $request->input('customer_name', 'Test Customer'),
-            'customer_phone' => $request->input('customer_phone', '09123456789'),  
-            'customer_email' => $request->input('customer_email'),
+            'customer_name' => 'Ultra Test Customer',
+            'customer_phone' => '09123456789',
             'status' => 'pending',
-            'total_amount' => 999.99, // Use fixed amount for now
-            'pickup_or_delivery' => $request->input('pickup_or_delivery', 'pickup'),
-            'payment_method' => $request->input('payment_method', 'cash'),
+            'total_amount' => 100.00,
+            'pickup_or_delivery' => 'pickup',
+            'payment_method' => 'cash',
             'payment_status' => 'pending'
         ]);
         
-        \Log::info('✅ Bypass order created', ['order_id' => $order->id]);
-        return redirect()->route('order.confirmation', ['order' => $order->id])->with('success', 'Bypass order created!');
+        \Log::info('✅ Ultra simple order created', ['order_id' => $order->id]);
+        
+        // Direct URL redirect instead of route
+        return redirect('/order-confirmation/' . $order->id)->with('success', 'Ultra simple order created!');
         
     } catch (\Exception $e) {
-        \Log::error('❌ Bypass order failed', ['error' => $e->getMessage()]);
-        return back()->withErrors(['error' => $e->getMessage()]);
+        \Log::error('❌ Ultra simple order failed', ['error' => $e->getMessage()]);
+        return response()->json(['error' => $e->getMessage()], 500);
     }
 });
 
