@@ -125,11 +125,11 @@ Route::post('/ultra-simple-order', function(Request $request) {
         $order = \App\Models\Order::create([
             'customer_name' => 'Ultra Test Customer',
             'customer_phone' => '09123456789',
-            'status' => 'pending',
+            'status' => \App\Models\Order::STATUS_PENDING,
             'total_amount' => 100.00,
-            'pickup_or_delivery' => 'pickup',
-            'payment_method' => 'cash',
-            'payment_status' => 'pending'
+            'pickup_or_delivery' => \App\Models\Order::PICKUP,
+            'payment_method' => \App\Models\Order::PAYMENT_CASH,
+            'payment_status' => \App\Models\Order::PAYMENT_STATUS_PENDING
         ]);
         
         \Log::info('✅ Ultra simple order created', ['order_id' => $order->id]);

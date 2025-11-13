@@ -195,11 +195,11 @@ class OrderController extends Controller
                 'customer_name' => $request->input('customer_name', 'Order Customer'),
                 'customer_phone' => $request->input('customer_phone', '09123456789'),
                 'customer_email' => $request->input('customer_email'),
-                'status' => 'pending',
+                'status' => Order::STATUS_PENDING,
                 'total_amount' => 100.00, // Use fixed amount like ultra-simple
-                'pickup_or_delivery' => $request->input('pickup_or_delivery', 'pickup'),
-                'payment_method' => $request->input('payment_method', 'cash'),
-                'payment_status' => 'pending'
+                'pickup_or_delivery' => Order::PICKUP,
+                'payment_method' => Order::PAYMENT_CASH, // Use proper constant
+                'payment_status' => Order::PAYMENT_STATUS_PENDING
             ]);
             
             \Log::info('✅ Order created successfully', ['order_id' => $order->id]);
