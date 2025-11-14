@@ -237,6 +237,15 @@ class OrderController extends Controller
             // Get payment method from request (default to cash)
             $requestedPaymentMethod = $request->input('payment_method', 'cash');
             
+            // Normalize payment method: database only accepts 'cash' or 'qr'
+            // Any non-cash payment (gcash, paymaya, etc.) becomes 'qr'
+            $normalizedPaymentMethod = ($requestedPaymentMethod === 'cash') ? 'cash' : 'qr';
+            
+            \Log::info('Payment method normalization', [
+                'requested' => $requestedPaymentMethod,
+                'normalized' => $normalizedPaymentMethod
+            ]);
+            
             // Create order with calculated total + OPTIONAL payment proof
             $orderData = [
                 'customer_name' => $request->input('customer_name', 'Order Customer'),
@@ -245,7 +254,7 @@ class OrderController extends Controller
                 'status' => Order::STATUS_PENDING,
                 'total_amount' => $total > 0 ? $total : 100.00,
                 'pickup_or_delivery' => $request->input('pickup_or_delivery', 'pickup'),
-                'payment_method' => $requestedPaymentMethod,
+                'payment_method' => $normalizedPaymentMethod,
                 'payment_status' => Order::PAYMENT_STATUS_PENDING,
                 'notes' => $request->input('notes', '')
             ];
