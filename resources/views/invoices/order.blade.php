@@ -186,7 +186,7 @@
                 @if($order->is_bulk_order)
                     <p><span class="badge badge-info">Bulk Order</span></p>
                 @endif
-                @if($order->is_senior_citizen)
+                @if($order->is_senior_discount)
                     <p><span class="badge badge-success">Senior/PWD Discount</span></p>
                 @endif
             </div>
@@ -227,21 +227,21 @@
             <table>
                 <tr>
                     <td><strong>Subtotal:</strong></td>
-                    <td class="text-right">₱{{ number_format($order->total_price, 2) }}</td>
+                    <td class="text-right">₱{{ number_format($order->total_amount, 2) }}</td>
                 </tr>
-                @if($order->is_senior_citizen)
+                @if($order->is_senior_discount)
                 <tr>
                     <td><strong>Senior/PWD Discount (20%):</strong></td>
-                    <td class="text-right">-₱{{ number_format($order->total_price * 0.20, 2) }}</td>
+                    <td class="text-right">-₱{{ number_format($order->total_amount * 0.20, 2) }}</td>
                 </tr>
                 <tr class="grand-total">
                     <td><strong>Total Amount:</strong></td>
-                    <td class="text-right"><strong>₱{{ number_format($order->total_price * 0.80, 2) }}</strong></td>
+                    <td class="text-right"><strong>₱{{ number_format($order->total_amount * 0.80, 2) }}</strong></td>
                 </tr>
                 @else
                 <tr class="grand-total">
                     <td><strong>Total Amount:</strong></td>
-                    <td class="text-right"><strong>₱{{ number_format($order->total_price, 2) }}</strong></td>
+                    <td class="text-right"><strong>₱{{ number_format($order->total_amount, 2) }}</strong></td>
                 </tr>
                 @endif
             </table>
