@@ -576,6 +576,9 @@ export default function CheckoutSimple({ cartItems, total, paymentSettings = [] 
                                                 </ul>
                                                 <p className="text-xs mt-1 italic">We personally handle all customer inquiries to ensure the best service.</p>
                                             </div>
+                                            <div>
+                                                <strong>Delivery Fee:</strong> Customers will shoulder the delivery fee. The final amount may vary depending on delivery location and order size.
+                                            </div>
                                         </div>
                                     </div>
                                     <div className="flex items-start">
