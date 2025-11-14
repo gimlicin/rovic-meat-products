@@ -186,6 +186,22 @@ class OrderController extends Controller
             return redirect()->back()->withErrors(['database' => 'Database connection failed'])->withInput();
         }
 
+        // OPTIONAL: Handle payment proof upload (won't break if not present)
+        $paymentProofPath = null;
+        if ($request->hasFile('payment_proof')) {
+            try {
+                $file = $request->file('payment_proof');
+                // Validate file
+                if ($file->isValid()) {
+                    $paymentProofPath = $file->store('payment-proofs', 'public');
+                    \Log::info('✅ Payment proof uploaded successfully', ['path' => $paymentProofPath]);
+                }
+            } catch (\Exception $e) {
+                \Log::warning('⚠️ Payment proof upload failed, continuing without it', ['error' => $e->getMessage()]);
+                // Don't fail the order - continue without payment proof
+            }
+        }
+
         // Calculate real cart total (copy logic from create method)
         $total = 0;
         $processedItems = [];
@@ -213,19 +229,32 @@ class OrderController extends Controller
 
         // Use real cart total instead of fixed amount
         try {
-            \Log::info('Creating order with real cart total', ['total' => $total]);
+            \Log::info('Creating order with real cart total', [
+                'total' => $total,
+                'has_payment_proof' => !empty($paymentProofPath)
+            ]);
             
-            // Create order with calculated total (SIMPLE VERSION - NO PAYMENT PROOF YET)
-            $order = Order::create([
+            // Create order with calculated total + OPTIONAL payment proof
+            $orderData = [
                 'customer_name' => $request->input('customer_name', 'Order Customer'),
                 'customer_phone' => $request->input('customer_phone', '09123456789'),
                 'customer_email' => $request->input('customer_email'),
                 'status' => Order::STATUS_PENDING,
-                'total_amount' => $total > 0 ? $total : 100.00, // Use real total or fallback
+                'total_amount' => $total > 0 ? $total : 100.00,
                 'pickup_or_delivery' => Order::PICKUP,
-                'payment_method' => Order::PAYMENT_CASH, // Use proper constant
+                'payment_method' => Order::PAYMENT_CASH,
                 'payment_status' => Order::PAYMENT_STATUS_PENDING
-            ]);
+            ];
+
+            // If payment proof was uploaded, update payment info
+            if ($paymentProofPath) {
+                $orderData['payment_proof_path'] = $paymentProofPath;
+                $orderData['payment_method'] = Order::PAYMENT_QR;
+                $orderData['payment_status'] = Order::PAYMENT_STATUS_SUBMITTED;
+                $orderData['status'] = Order::STATUS_PAYMENT_SUBMITTED;
+            }
+
+            $order = Order::create($orderData);
             
             \Log::info('✅ Order created successfully', ['order_id' => $order->id]);
             
