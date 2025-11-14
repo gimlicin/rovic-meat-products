@@ -94,14 +94,19 @@ function OrdersIndex({ orders, filters }: Props) {
     });
   };
 
-  const getStatusBadge = (status: string) => {
+  const getStatusBadge = (status: string, pickupOrDelivery?: string) => {
     const statusConfig = {
       pending: { variant: 'secondary' as const, label: 'Pending', icon: Clock, color: 'bg-gray-500' },
       payment_submitted: { variant: 'outline' as const, label: 'Payment Submitted', icon: Clock, color: 'bg-blue-500' },
       payment_approved: { variant: 'default' as const, label: 'Payment Approved', icon: CheckCircle, color: 'bg-green-500' },
       confirmed: { variant: 'default' as const, label: 'Confirmed', icon: CheckCircle, color: 'bg-green-500' },
       preparing: { variant: 'default' as const, label: 'Preparing', icon: ChefHat, color: 'bg-orange-500' },
-      ready: { variant: 'default' as const, label: 'Ready', icon: Package, color: 'bg-blue-500' },
+      ready: { 
+        variant: 'default' as const, 
+        label: pickupOrDelivery === 'delivery' ? 'Ready for Delivery' : 'Ready for Pickup',
+        icon: pickupOrDelivery === 'delivery' ? Truck : Package,
+        color: pickupOrDelivery === 'delivery' ? 'bg-indigo-500' : 'bg-purple-500'
+      },
       ready_for_pickup: { variant: 'default' as const, label: 'Ready for Pickup', icon: Package, color: 'bg-purple-500' },
       ready_for_delivery: { variant: 'default' as const, label: 'Ready for Delivery', icon: Truck, color: 'bg-indigo-500' },
       completed: { variant: 'default' as const, label: 'Completed', icon: CheckCircle, color: 'bg-green-600' },
@@ -424,7 +429,7 @@ function OrdersIndex({ orders, filters }: Props) {
                       <TableCell>
                         <span className="font-medium">{formatCurrency(order.total_amount)}</span>
                       </TableCell>
-                      <TableCell>{getStatusBadge(order.status)}</TableCell>
+                      <TableCell>{getStatusBadge(order.status, order.pickup_or_delivery)}</TableCell>
                       <TableCell>
                         <div className="flex items-center gap-2">
                           {getPaymentStatusBadge(order.payment_status)}
@@ -643,7 +648,7 @@ function OrdersIndex({ orders, filters }: Props) {
                       </div>
                       <p className="text-2xl font-bold">{formatCurrency(selectedOrder.total_amount)}</p>
                       <div className="mt-2 space-y-1">
-                        <div>{getStatusBadge(selectedOrder.status)}</div>
+                        <div>{getStatusBadge(selectedOrder.status, selectedOrder.pickup_or_delivery)}</div>
                         <div>{getPaymentStatusBadge(selectedOrder.payment_status)}</div>
                       </div>
                     </CardContent>

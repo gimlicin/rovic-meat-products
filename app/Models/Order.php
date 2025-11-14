@@ -49,7 +49,8 @@ class Order extends Model
     ];
 
     protected $appends = [
-        'payment_proof'
+        'payment_proof',
+        'status_label'
     ];
 
     public function getPaymentProofAttribute()
