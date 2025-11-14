@@ -234,6 +234,9 @@ class OrderController extends Controller
                 'has_payment_proof' => !empty($paymentProofPath)
             ]);
             
+            // Get payment method from request (default to cash)
+            $requestedPaymentMethod = $request->input('payment_method', 'cash');
+            
             // Create order with calculated total + OPTIONAL payment proof
             $orderData = [
                 'customer_name' => $request->input('customer_name', 'Order Customer'),
@@ -241,17 +244,18 @@ class OrderController extends Controller
                 'customer_email' => $request->input('customer_email'),
                 'status' => Order::STATUS_PENDING,
                 'total_amount' => $total > 0 ? $total : 100.00,
-                'pickup_or_delivery' => Order::PICKUP,
-                'payment_method' => Order::PAYMENT_CASH,
-                'payment_status' => Order::PAYMENT_STATUS_PENDING
+                'pickup_or_delivery' => $request->input('pickup_or_delivery', 'pickup'),
+                'payment_method' => $requestedPaymentMethod,
+                'payment_status' => Order::PAYMENT_STATUS_PENDING,
+                'notes' => $request->input('notes', '')
             ];
 
             // If payment proof was uploaded, update payment info
             if ($paymentProofPath) {
                 $orderData['payment_proof_path'] = $paymentProofPath;
-                $orderData['payment_method'] = Order::PAYMENT_QR;
                 $orderData['payment_status'] = Order::PAYMENT_STATUS_SUBMITTED;
                 $orderData['status'] = Order::STATUS_PAYMENT_SUBMITTED;
+                \Log::info('📸 Payment proof attached to order');
             }
 
             $order = Order::create($orderData);

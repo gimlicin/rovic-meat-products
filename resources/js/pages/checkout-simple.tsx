@@ -36,9 +36,7 @@ export default function CheckoutSimple({ cartItems, total, paymentSettings = [] 
     const { props } = usePage<any>();
     const [paymentProof, setPaymentProof] = useState<File | null>(null);
     const [isSeniorCitizen, setIsSeniorCitizen] = useState<boolean>(false);
-    const [selectedPaymentMethod, setSelectedPaymentMethod] = useState<number | null>(
-        paymentSettings.length > 0 ? paymentSettings[0].id : null
-    );
+    const [selectedPaymentMethod, setSelectedPaymentMethod] = useState<number | null>(null); // Default to cash (null)
     const [showInstructions, setShowInstructions] = useState<boolean>(false);
 
     // Calculate senior discount (20% as mandated by RA 9994)
@@ -51,7 +49,7 @@ export default function CheckoutSimple({ cartItems, total, paymentSettings = [] 
         customer_phone: '',
         customer_email: '',
         notes: '',
-        payment_method: paymentSettings.length > 0 ? paymentSettings[0].payment_method : 'qr',
+        payment_method: 'cash', // Default to cash payment
         payment_proof: null as File | null,
         cart_items: [] as any[],
         pickup_or_delivery: 'pickup',
@@ -227,6 +225,32 @@ export default function CheckoutSimple({ cartItems, total, paymentSettings = [] 
                                         <div>
                                             <h4 className="text-base font-medium text-gray-900 mb-3">Choose Your Payment Method:</h4>
                                             <div className="space-y-3">
+                                                {/* Cash on Delivery Option */}
+                                                <label
+                                                    className={`flex items-center p-4 border-2 rounded-lg cursor-pointer transition-all ${
+                                                        selectedPaymentMethod === null
+                                                            ? 'border-green-500 bg-green-50'
+                                                            : 'border-gray-200 hover:border-green-300'
+                                                    }`}
+                                                >
+                                                    <input
+                                                        type="radio"
+                                                        name="payment_method"
+                                                        value="cash"
+                                                        checked={selectedPaymentMethod === null}
+                                                        onChange={() => {
+                                                            setSelectedPaymentMethod(null);
+                                                            setData('payment_method', 'cash');
+                                                            setPaymentProof(null);
+                                                        }}
+                                                        className="mr-3 h-5 w-5 text-green-600"
+                                                    />
+                                                    <span className="text-base font-medium">
+                                                        💰 Cash on Delivery / Pickup
+                                                    </span>
+                                                </label>
+
+                                                {/* QR Payment Options */}
                                                 {paymentSettings.map((setting) => (
                                                     <label
                                                         key={setting.id}
@@ -330,8 +354,8 @@ export default function CheckoutSimple({ cartItems, total, paymentSettings = [] 
                                     </div>
                                 )}
                                 
-                                {/* Payment Proof Upload - Only show for QR/GCash payments */}
-                                {(data.payment_method === 'qr' || data.payment_method === 'gcash') && (
+                                {/* Payment Proof Upload - Only show for non-cash payments */}
+                                {data.payment_method !== 'cash' && selectedPaymentMethod !== null && (
                                     <div className="p-5 border-2 border-dashed border-gray-300 rounded-lg bg-gray-50">
                                         <label className="block text-base font-semibold mb-2 flex items-center gap-2">
                                             📤 Upload Payment Proof *
@@ -571,18 +595,18 @@ export default function CheckoutSimple({ cartItems, total, paymentSettings = [] 
 
                                 <button
                                     type="submit"
-                                    disabled={processing || ((data.payment_method === 'qr' || data.payment_method === 'gcash') && !paymentProof) || !data.terms_accepted}
+                                    disabled={processing || ((data.payment_method !== 'cash' && data.payment_method !== null) && !paymentProof) || !data.terms_accepted}
                                     className="w-full bg-red-600 text-white py-4 px-6 rounded-lg font-semibold hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed text-base transition-colors shadow-md"
                                 >
                                     {processing ? '⏳ Processing Your Order...' : '🛒 Place Order'}
                                 </button>
                                 
-                                {(((data.payment_method === 'qr' || data.payment_method === 'gcash') && !paymentProof) || !data.terms_accepted) && (
+                                {(((data.payment_method !== 'cash' && !paymentProof) || !data.terms_accepted) && (
                                     <div className="text-sm text-gray-500 text-center space-y-1">
-                                        {(data.payment_method === 'qr' || data.payment_method === 'gcash') && !paymentProof && <p>Please upload payment proof to continue</p>}
+                                        {data.payment_method !== 'cash' && !paymentProof && <p>Please upload payment proof to continue</p>}
                                         {!data.terms_accepted && <p>Please accept the terms and conditions to continue</p>}
                                     </div>
-                                )}
+                                ))}
                             </form>
                         </div>
                     </div>
