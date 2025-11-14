@@ -42,8 +42,14 @@ export const NotificationProvider: React.FC<NotificationProviderProps> = ({ chil
     const [notifications, setNotifications] = useState<Notification[]>([]);
     const [isOpen, setIsOpen] = useState(false);
 
-    // Load notifications from API
+    // Load notifications from API with debouncing to prevent excessive requests
+    const [isLoading, setIsLoading] = useState(false);
+    
     const loadNotifications = async () => {
+        // Prevent multiple simultaneous requests
+        if (isLoading) return;
+        
+        setIsLoading(true);
         try {
             const csrfToken = (window as any).Laravel?.csrfToken;
             const response = await fetch('/api/notifications', {
@@ -66,6 +72,8 @@ export const NotificationProvider: React.FC<NotificationProviderProps> = ({ chil
         } catch (error) {
             // Silently handle errors during logout/unauthenticated state
             setNotifications([]);
+        } finally {
+            setIsLoading(false);
         }
     };
 
@@ -73,11 +81,14 @@ export const NotificationProvider: React.FC<NotificationProviderProps> = ({ chil
     React.useEffect(() => {
         loadNotifications();
         
-        // Reload notifications after Inertia navigations (login, logout, etc.)
+        // Reload notifications after Inertia navigations (login, logout, etc.) with debouncing
         const handleFinish = () => {
             setTimeout(() => {
-                loadNotifications();
-            }, 100);
+                // Only reload if not currently loading
+                if (!isLoading) {
+                    loadNotifications();
+                }
+            }, 500); // Increased delay to reduce frequency
         };
 
         router.on('finish', handleFinish);
