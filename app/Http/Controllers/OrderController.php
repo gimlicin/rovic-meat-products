@@ -248,6 +248,7 @@ class OrderController extends Controller
             
             // Create order with calculated total + OPTIONAL payment proof
             $orderData = [
+                'user_id' => auth()->id(), // Associate with logged-in user
                 'customer_name' => $request->input('customer_name', 'Order Customer'),
                 'customer_phone' => $request->input('customer_phone', '09123456789'),
                 'customer_email' => $request->input('customer_email'),
