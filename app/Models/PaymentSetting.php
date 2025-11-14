@@ -38,8 +38,8 @@ class PaymentSetting extends Model
             return $this->qr_code_path;
         }
 
-        // Otherwise, generate storage URL
-        return asset('storage/' . $this->qr_code_path);
+        // Use route-based serving for better production compatibility
+        return route('payment-settings.qr-code', $this->id);
     }
 
     /**

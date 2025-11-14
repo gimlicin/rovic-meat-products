@@ -133,4 +133,22 @@ class PaymentSettingController extends Controller
 
         return redirect()->back()->with('success', 'Payment setting status updated.');
     }
+
+    /**
+     * Serve QR code image file
+     */
+    public function viewQrCode(PaymentSetting $paymentSetting)
+    {
+        if (!$paymentSetting->qr_code_path) {
+            abort(404, 'QR code not found.');
+        }
+
+        $path = storage_path('app/public/' . $paymentSetting->qr_code_path);
+        
+        if (!file_exists($path)) {
+            abort(404, 'QR code file not found.');
+        }
+
+        return response()->file($path);
+    }
 }
