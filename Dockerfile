@@ -53,8 +53,10 @@ COPY . .
 RUN npm run build
 
 # Set up Laravel
-# Don't copy .env.example - Render uses environment variables
-RUN php artisan key:generate --force --no-interaction
+# Create minimal .env for build (Render will use environment variables at runtime)
+RUN touch .env && \
+    echo "APP_KEY=" >> .env && \
+    php artisan key:generate --force --no-interaction
 
 # Create database setup script
 RUN echo '#!/bin/bash\n\
