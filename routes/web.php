@@ -289,6 +289,17 @@ Route::get('/test-cloudinary-upload', function() {
     }
 })->name('test.cloudinary.upload');
 
+// Clear config cache
+Route::get('/clear-config', function() {
+    \Artisan::call('config:clear');
+    \Artisan::call('cache:clear');
+    
+    return response()->json([
+        'message' => 'Config and cache cleared successfully!',
+        'config_clear_output' => \Artisan::output(),
+    ]);
+})->name('clear.config');
+
 // Test Cloudinary configuration
 Route::get('/test-cloudinary-config', function() {
     $results = [];

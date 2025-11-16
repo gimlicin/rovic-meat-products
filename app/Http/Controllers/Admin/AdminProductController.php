@@ -9,6 +9,7 @@ use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Illuminate\Support\Facades\Storage;
 use CloudinaryLabs\CloudinaryLaravel\Facades\Cloudinary;
+use Cloudinary\Cloudinary as CloudinaryAPI;
 
 class AdminProductController extends Controller
 {
@@ -90,13 +91,38 @@ class AdminProductController extends Controller
                 
                 file_put_contents(storage_path('cloudinary_debug.txt'), date('Y-m-d H:i:s') . ' - BEFORE UPLOAD: Config OK, attempting upload...' . "\n", FILE_APPEND);
                 
-                // Upload to Cloudinary - Pass the UploadedFile directly (NOT getRealPath())
-                $result = $request->file('image')->storeOnCloudinary('rovic-products');
+                // Create Cloudinary instance with config
+                $cloudinary = new CloudinaryAPI([
+                    'cloud' => [
+                        'cloud_name' => $cloudName,
+                        'api_key' => $apiKey,
+                        'api_secret' => $apiSecret,
+                    ],
+                    'url' => [
+                        'secure' => true
+                    ]
+                ]);
                 
-                file_put_contents(storage_path('cloudinary_debug.txt'), date('Y-m-d H:i:s') . ' - AFTER UPLOAD: Got response type: ' . gettype($result) . "\n", FILE_APPEND);
+                // Upload using the Cloudinary SDK directly
+                $uploadResult = $cloudinary->uploadApi()->upload(
+                    $request->file('image')->getRealPath(),
+                    [
+                        'folder' => 'rovic-products',
+                        'resource_type' => 'image',
+                    ]
+                );
                 
-                // Get the secure URL from the result
-                $validated['image_url'] = $result->getSecurePath();
+                // Convert ApiResponse object to array
+                $resultArray = $uploadResult->getArrayCopy();
+                
+                file_put_contents(storage_path('cloudinary_debug.txt'), date('Y-m-d H:i:s') . ' - AFTER UPLOAD: Got response, keys: ' . implode(', ', array_keys($resultArray)) . "\n", FILE_APPEND);
+                
+                // Get the secure URL from the result array
+                if (isset($resultArray['secure_url'])) {
+                    $validated['image_url'] = $resultArray['secure_url'];
+                } else {
+                    throw new \Exception('No secure_url in response: ' . json_encode($resultArray));
+                }
                 $uploadDebug['result'] = 'cloudinary_success';
                 $uploadDebug['url'] = $validated['image_url'];
                 
@@ -202,9 +228,30 @@ class AdminProductController extends Controller
             try {
                 file_put_contents(storage_path('cloudinary_debug.txt'), date('Y-m-d H:i:s') . ' - UPDATE: Starting Cloudinary upload for product #' . $product->id . "\n", FILE_APPEND);
                 
-                // Upload to Cloudinary - Use Laravel's storeOnCloudinary method
-                $result = $request->file('image')->storeOnCloudinary('rovic-products');
-                $validated['image_url'] = $result->getSecurePath();
+                // Create Cloudinary instance
+                $cloudinary = new CloudinaryAPI([
+                    'cloud' => [
+                        'cloud_name' => config('cloudinary.cloud_name'),
+                        'api_key' => config('cloudinary.api_key'),
+                        'api_secret' => config('cloudinary.api_secret'),
+                    ],
+                    'url' => [
+                        'secure' => true
+                    ]
+                ]);
+                
+                // Upload using the Cloudinary SDK
+                $uploadResult = $cloudinary->uploadApi()->upload(
+                    $request->file('image')->getRealPath(),
+                    [
+                        'folder' => 'rovic-products',
+                        'resource_type' => 'image',
+                    ]
+                );
+                
+                // Convert ApiResponse object to array
+                $resultArray = $uploadResult->getArrayCopy();
+                $validated['image_url'] = $resultArray['secure_url'];
                 
                 file_put_contents(storage_path('cloudinary_debug.txt'), date('Y-m-d H:i:s') . ' - UPDATE SUCCESS! URL: ' . $validated['image_url'] . "\n", FILE_APPEND);
                 

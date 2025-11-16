@@ -1,0 +1,36 @@
+version: '3.8'
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000"
+    environment:
+      - APP_ENV=local
+      - APP_DEBUG=true
+      - DATABASE_URL=postgresql://rovicuser:rovicpass@db:5432/rovicdb
+      - CLOUDINARY_URL=cloudinary://343732134677756:VRZcKClpgKi8PlnahFYvato7h1M@rovic-meatproducts
+      - CLOUDINARY_CLOUD_NAME=rovic-meatproducts
+      - CLOUDINARY_API_KEY=343732134677756
+      - CLOUDINARY_API_SECRET=VRZcKClpgKi8PlnahFYvato7h1M
+    volumes:
+      - .:/var/www/html
+    depends_on:
+      - db
+    command: php artisan serve --host=0.0.0.0 --port=8000
+
+  db:
+    image: postgres:15
+    environment:
+      - POSTGRES_USER=rovicuser
+      - POSTGRES_PASSWORD=rovicpass
+      - POSTGRES_DB=rovicdb
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+volumes:
+  postgres_data:
