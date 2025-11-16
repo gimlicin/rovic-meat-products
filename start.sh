@@ -51,6 +51,14 @@ sed -i "s/listen 80/listen $PORT/g" /etc/nginx/sites-available/default
 echo "Clearing Laravel config cache..."
 php artisan config:clear || echo "Config clear failed"
 
+# Run database migrations (critical for first deploy!)
+echo "Running database migrations..."
+php artisan migrate --force || echo "Migration failed, continuing..."
+
+# Link storage (for file uploads)
+echo "Linking storage..."
+php artisan storage:link || echo "Storage link already exists"
+
 # Start supervisor to run nginx + php-fpm
 echo "Starting web services..."
 exec supervisord -c /etc/supervisor/conf.d/supervisord.conf
