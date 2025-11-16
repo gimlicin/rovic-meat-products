@@ -79,11 +79,28 @@ class AdminProductController extends Controller
             try {
                 $uploadDebug['attempt'] = 'cloudinary_upload_starting';
                 
+                // Debug: Check config BEFORE upload
+                $cloudName = config('cloudinary.cloud_name');
+                $apiKey = config('cloudinary.api_key');
+                $apiSecret = config('cloudinary.api_secret');
+                
+                if (empty($cloudName) || empty($apiKey) || empty($apiSecret)) {
+                    throw new \Exception('Cloudinary config incomplete: cloud_name=' . ($cloudName ?: 'NULL') . ', api_key=' . ($apiKey ? 'SET' : 'NULL') . ', api_secret=' . ($apiSecret ? 'SET' : 'NULL'));
+                }
+                
+                file_put_contents(storage_path('cloudinary_debug.txt'), date('Y-m-d H:i:s') . ' - BEFORE UPLOAD: Config OK, attempting upload...' . "\n", FILE_APPEND);
+                
                 // Upload to Cloudinary
                 $uploadedFile = Cloudinary::upload($request->file('image')->getRealPath(), [
                     'folder' => 'rovic-products',
                     'resource_type' => 'image'
                 ]);
+                
+                file_put_contents(storage_path('cloudinary_debug.txt'), date('Y-m-d H:i:s') . ' - AFTER UPLOAD: Got response, extracting URL...' . "\n", FILE_APPEND);
+                
+                if (!$uploadedFile || !method_exists($uploadedFile, 'getSecurePath')) {
+                    throw new \Exception('Upload response is invalid: ' . gettype($uploadedFile));
+                }
                 
                 $validated['image_url'] = $uploadedFile->getSecurePath();
                 $uploadDebug['result'] = 'cloudinary_success';
@@ -108,9 +125,16 @@ class AdminProductController extends Controller
                 $validated['image_url'] = '/storage/' . $path;
                 $uploadDebug['fallback_path'] = $validated['image_url'];
                 
-                // Store error in debug file AND session
-                $debugMsg = 'Cloudinary FAILED: ' . $e->getMessage() . ' | Error Class: ' . get_class($e) . ' | Saved to local: ' . $validated['image_url'];
+                // Store DETAILED error in debug file
+                $debugMsg = 'Cloudinary FAILED: ' . $e->getMessage() 
+                    . ' | Class: ' . get_class($e) 
+                    . ' | File: ' . basename($e->getFile()) . ':' . $e->getLine()
+                    . ' | Fallback: ' . $validated['image_url'];
                 file_put_contents(storage_path('cloudinary_debug.txt'), date('Y-m-d H:i:s') . ' - ' . $debugMsg . "\n", FILE_APPEND);
+                
+                // Also log the stack trace for deeper debugging
+                file_put_contents(storage_path('cloudinary_debug.txt'), '  Stack trace: ' . $e->getTraceAsString() . "\n\n", FILE_APPEND);
+                
                 session()->flash('cloudinary_debug', $debugMsg);
             }
         } elseif ($request->filled('image_url')) {
