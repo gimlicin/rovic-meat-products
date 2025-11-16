@@ -90,18 +90,13 @@ class AdminProductController extends Controller
                 
                 file_put_contents(storage_path('cloudinary_debug.txt'), date('Y-m-d H:i:s') . ' - BEFORE UPLOAD: Config OK, attempting upload...' . "\n", FILE_APPEND);
                 
-                // Upload to Cloudinary - Using the correct method
-                $uploadedFile = Cloudinary::uploadFile($request->file('image')->getRealPath(), [
-                    'folder' => 'rovic-products',
-                ]);
+                // Upload to Cloudinary - Pass the UploadedFile directly (NOT getRealPath())
+                $result = $request->file('image')->storeOnCloudinary('rovic-products');
                 
-                file_put_contents(storage_path('cloudinary_debug.txt'), date('Y-m-d H:i:s') . ' - AFTER UPLOAD: Got response, extracting URL...' . "\n", FILE_APPEND);
+                file_put_contents(storage_path('cloudinary_debug.txt'), date('Y-m-d H:i:s') . ' - AFTER UPLOAD: Got response type: ' . gettype($result) . "\n", FILE_APPEND);
                 
-                if (!$uploadedFile) {
-                    throw new \Exception('Upload response is null');
-                }
-                
-                $validated['image_url'] = $uploadedFile->getSecurePath();
+                // Get the secure URL from the result
+                $validated['image_url'] = $result->getSecurePath();
                 $uploadDebug['result'] = 'cloudinary_success';
                 $uploadDebug['url'] = $validated['image_url'];
                 
@@ -207,11 +202,9 @@ class AdminProductController extends Controller
             try {
                 file_put_contents(storage_path('cloudinary_debug.txt'), date('Y-m-d H:i:s') . ' - UPDATE: Starting Cloudinary upload for product #' . $product->id . "\n", FILE_APPEND);
                 
-                // Upload to Cloudinary - Using the correct method
-                $uploadedFile = Cloudinary::uploadFile($request->file('image')->getRealPath(), [
-                    'folder' => 'rovic-products',
-                ]);
-                $validated['image_url'] = $uploadedFile->getSecurePath();
+                // Upload to Cloudinary - Use Laravel's storeOnCloudinary method
+                $result = $request->file('image')->storeOnCloudinary('rovic-products');
+                $validated['image_url'] = $result->getSecurePath();
                 
                 file_put_contents(storage_path('cloudinary_debug.txt'), date('Y-m-d H:i:s') . ' - UPDATE SUCCESS! URL: ' . $validated['image_url'] . "\n", FILE_APPEND);
                 
