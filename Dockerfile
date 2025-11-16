@@ -61,6 +61,11 @@ RUN touch .env && \
 # Configure PHP-FPM to pass environment variables to PHP
 RUN echo "clear_env = no" >> /usr/local/etc/php-fpm.d/www.conf
 
+# Configure PHP-FPM to log to stderr for Docker
+RUN echo "catch_workers_output = yes" >> /usr/local/etc/php-fpm.d/www.conf && \
+    echo "php_admin_flag[log_errors] = on" >> /usr/local/etc/php-fpm.d/www.conf && \
+    echo "php_admin_value[error_log] = /proc/self/fd/2" >> /usr/local/etc/php-fpm.d/www.conf
+
 # Create database setup script
 RUN echo '#!/bin/bash\n\
 echo "Setting up database..."\n\

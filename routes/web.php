@@ -220,6 +220,8 @@ Route::prefix('auth')->group(function () {
 
 // Temporary debug route - remove after fixing Cloudinary
 Route::get('/debug-cloudinary', function() {
+    error_log('🧪 DEBUG ENDPOINT HIT - Testing if error_log() works!');
+    
     return response()->json([
         'cloudinary_config' => [
             'cloud_name' => config('cloudinary.cloud_name'),
@@ -232,5 +234,84 @@ Route::get('/debug-cloudinary', function() {
             'has_secret' => !empty(env('CLOUDINARY_API_SECRET')),
         ],
         'package_exists' => class_exists('CloudinaryLabs\CloudinaryLaravel\Facades\Cloudinary'),
+        'message' => 'Check Render logs for: 🧪 DEBUG ENDPOINT HIT',
     ]);
 })->name('debug.cloudinary');
+
+// Test Cloudinary upload with a sample image
+Route::get('/test-cloudinary-upload', function() {
+    error_log('🧪 TEST UPLOAD ENDPOINT HIT!');
+    error_log('☁️ Cloud Name: ' . config('cloudinary.cloud_name'));
+    error_log('🔑 API Key: ' . config('cloudinary.api_key'));
+    error_log('🔐 Has Secret: ' . (!empty(config('cloudinary.api_secret')) ? 'YES' : 'NO'));
+    
+    try {
+        // Create a test image in memory
+        $testImage = imagecreate(100, 100);
+        $bgColor = imagecolorallocate($testImage, 255, 0, 0);
+        $tmpFile = sys_get_temp_dir() . '/test-' . time() . '.png';
+        imagepng($testImage, $tmpFile);
+        imagedestroy($testImage);
+        
+        error_log('📸 Test image created: ' . $tmpFile);
+        error_log('🚀 Attempting Cloudinary upload...');
+        
+        // Upload to Cloudinary
+        $result = \CloudinaryLabs\CloudinaryLaravel\Facades\Cloudinary::upload($tmpFile, [
+            'folder' => 'rovic-products',
+            'resource_type' => 'image'
+        ]);
+        
+        $url = $result->getSecurePath();
+        error_log('✅ CLOUDINARY UPLOAD SUCCESS! URL: ' . $url);
+        
+        // Clean up
+        @unlink($tmpFile);
+        
+        return response()->json([
+            'success' => true,
+            'message' => 'Cloudinary upload works!',
+            'url' => $url,
+            'check_logs' => 'Look for ✅ CLOUDINARY UPLOAD SUCCESS in Render logs',
+        ]);
+        
+    } catch (\Exception $e) {
+        error_log('❌ CLOUDINARY TEST FAILED: ' . $e->getMessage());
+        error_log('❌ Exception class: ' . get_class($e));
+        error_log('❌ Stack trace: ' . $e->getTraceAsString());
+        
+        return response()->json([
+            'success' => false,
+            'error' => $e->getMessage(),
+            'class' => get_class($e),
+            'check_logs' => 'Look for ❌ CLOUDINARY TEST FAILED in Render logs',
+        ], 500);
+    }
+})->name('test.cloudinary.upload');
+
+// View Laravel logs
+Route::get('/debug-logs', function() {
+    $logPath = storage_path('logs/laravel.log');
+    
+    if (!file_exists($logPath)) {
+        return response()->json([
+            'error' => 'Log file does not exist',
+            'path' => $logPath,
+        ]);
+    }
+    
+    // Get last 100 lines
+    $lines = [];
+    $file = new \SplFileObject($logPath);
+    $file->seek(PHP_INT_MAX);
+    $lastLine = $file->key();
+    $startLine = max(0, $lastLine - 100);
+    
+    $file->seek($startLine);
+    while (!$file->eof()) {
+        $lines[] = $file->current();
+        $file->next();
+    }
+    
+    return response('<pre>' . implode('', $lines) . '</pre>');
+})->name('debug.logs');
