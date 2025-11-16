@@ -63,6 +63,11 @@ class AdminProductController extends Controller
         // Handle image upload
         if ($request->hasFile('image')) {
             try {
+                // CRITICAL: Log to stderr for Docker/Render visibility
+                error_log('🔄 CLOUDINARY: Upload attempt starting...');
+                error_log('📸 File: ' . $request->file('image')->getClientOriginalName());
+                error_log('☁️ Cloud: ' . config('cloudinary.cloud_name'));
+                
                 \Log::error('🔄 CLOUDINARY DEBUG: Attempting upload', [
                     'file_name' => $request->file('image')->getClientOriginalName(),
                     'cloud_name' => config('cloudinary.cloud_name'),
@@ -77,8 +82,12 @@ class AdminProductController extends Controller
                 ]);
                 
                 $validated['image_url'] = $uploadedFile->getSecurePath();
+                
+                error_log('✅ CLOUDINARY SUCCESS! URL: ' . $validated['image_url']);
                 \Log::error('✅ CLOUDINARY SUCCESS!', ['url' => $validated['image_url']]);
             } catch (\Exception $e) {
+                error_log('❌ CLOUDINARY FAILED: ' . $e->getMessage());
+                
                 \Log::error('❌ CLOUDINARY UPLOAD FAILED', [
                     'error' => $e->getMessage(),
                     'class' => get_class($e),
@@ -89,13 +98,17 @@ class AdminProductController extends Controller
                 $filename = time() . '_' . $image->getClientOriginalName();
                 $path = $image->storeAs('products', $filename, 'public');
                 $validated['image_url'] = '/storage/' . $path;
+                
+                error_log('⚠️ FALLBACK: Saved to local storage: ' . $validated['image_url']);
                 \Log::info('⚠️ Using local storage fallback', ['path' => $validated['image_url']]);
             }
         } elseif ($request->filled('image_url')) {
             // Keep existing image_url if provided (backward compatibility)
             $validated['image_url'] = $request->image_url;
+            error_log('ℹ️ KEEPING EXISTING IMAGE URL: ' . $validated['image_url']);
         } else {
             $validated['image_url'] = null;
+            error_log('⚠️ NO FILE UPLOADED - No image will be saved');
         }
 
         // Remove 'image' from validated data as it's not a database column
@@ -156,6 +169,12 @@ class AdminProductController extends Controller
         // Handle image upload
         if ($request->hasFile('image')) {
             try {
+                // CRITICAL: Log to stderr for Docker/Render visibility
+                error_log('🔄 CLOUDINARY (UPDATE): Upload attempt starting...');
+                error_log('📸 File: ' . $request->file('image')->getClientOriginalName());
+                error_log('🆔 Product ID: ' . $product->id);
+                error_log('☁️ Cloud: ' . config('cloudinary.cloud_name'));
+                
                 \Log::error('🔄 CLOUDINARY DEBUG: Attempting upload (update)', [
                     'file_name' => $request->file('image')->getClientOriginalName(),
                     'product_id' => $product->id,
@@ -169,6 +188,8 @@ class AdminProductController extends Controller
                     'resource_type' => 'image'
                 ]);
                 $validated['image_url'] = $uploadedFile->getSecurePath();
+                
+                error_log('✅ CLOUDINARY SUCCESS (UPDATE)! URL: ' . $validated['image_url']);
                 \Log::error('✅ CLOUDINARY SUCCESS (update)!', ['url' => $validated['image_url']]);
                 
                 // Delete old local image if exists
@@ -177,6 +198,8 @@ class AdminProductController extends Controller
                     \Storage::disk('public')->delete($oldPath);
                 }
             } catch (\Exception $e) {
+                error_log('❌ CLOUDINARY FAILED (UPDATE): ' . $e->getMessage());
+                
                 \Log::error('❌ CLOUDINARY UPLOAD FAILED (update)', [
                     'error' => $e->getMessage(),
                     'class' => get_class($e),
@@ -190,13 +213,17 @@ class AdminProductController extends Controller
                 $filename = time() . '_' . $image->getClientOriginalName();
                 $path = $image->storeAs('products', $filename, 'public');
                 $validated['image_url'] = '/storage/' . $path;
+                
+                error_log('⚠️ FALLBACK (UPDATE): Saved to local storage: ' . $validated['image_url']);
                 \Log::info('⚠️ Using local storage fallback (update)', ['path' => $validated['image_url']]);
             }
         } elseif ($request->filled('image_url')) {
             // Keep existing image_url if provided
             $validated['image_url'] = $request->image_url;
+            error_log('ℹ️ KEEPING EXISTING IMAGE URL (UPDATE): ' . $validated['image_url']);
+        } else {
+            error_log('ℹ️ NO IMAGE CHANGE (UPDATE) - Keeping product image');
         }
-        // If neither, keep existing product image
 
         // Remove 'image' from validated data
         unset($validated['image']);
