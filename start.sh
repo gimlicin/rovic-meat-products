@@ -47,6 +47,12 @@ fi
 echo "Configuring nginx for port $PORT..."
 sed -i "s/listen 80/listen $PORT/g" /etc/nginx/sites-available/default
 
+# Ensure storage directories exist with proper permissions
+echo "Setting up storage directories..."
+mkdir -p storage/logs storage/framework/{sessions,views,cache} storage/app/public bootstrap/cache
+chmod -R 775 storage bootstrap/cache
+chown -R www-data:www-data storage bootstrap/cache
+
 # CRITICAL: Clear config cache so Laravel reads fresh environment variables
 echo "Clearing Laravel config cache..."
 php artisan config:clear || echo "Config clear failed"

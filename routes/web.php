@@ -292,26 +292,36 @@ Route::get('/test-cloudinary-upload', function() {
 // View Laravel logs
 Route::get('/debug-logs', function() {
     $logPath = storage_path('logs/laravel.log');
+    $storagePath = storage_path();
+    $logsDir = storage_path('logs');
+    
+    $info = [
+        'storage_path' => $storagePath,
+        'logs_dir' => $logsDir,
+        'logs_dir_exists' => is_dir($logsDir),
+        'logs_dir_writable' => is_writable($logsDir),
+        'log_file_path' => $logPath,
+        'log_file_exists' => file_exists($logPath),
+    ];
     
     if (!file_exists($logPath)) {
+        // Try to create it
+        @touch($logPath);
+        @chmod($logPath, 0664);
+        
         return response()->json([
-            'error' => 'Log file does not exist',
-            'path' => $logPath,
+            'error' => 'Log file does not exist (tried to create it)',
+            'info' => $info,
+            'all_logs' => is_dir($logsDir) ? scandir($logsDir) : 'logs dir does not exist',
         ]);
     }
     
-    // Get last 100 lines
-    $lines = [];
-    $file = new \SplFileObject($logPath);
-    $file->seek(PHP_INT_MAX);
-    $lastLine = $file->key();
-    $startLine = max(0, $lastLine - 100);
+    // Get last 200 lines
+    $content = file_get_contents($logPath);
+    $lines = explode("\n", $content);
+    $lines = array_slice($lines, -200);
     
-    $file->seek($startLine);
-    while (!$file->eof()) {
-        $lines[] = $file->current();
-        $file->next();
-    }
-    
-    return response('<pre>' . implode('', $lines) . '</pre>');
+    return response('<pre style="background:#1e1e1e;color:#dcdcdc;padding:20px;font-size:12px;line-height:1.5;">' 
+        . htmlspecialchars(implode("\n", $lines)) 
+        . '</pre>');
 })->name('debug.logs');
