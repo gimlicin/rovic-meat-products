@@ -291,12 +291,25 @@ Route::get('/test-cloudinary-upload', function() {
 
 // View Cloudinary upload debug info
 Route::get('/cloudinary-last-upload', function() {
-    $debug = session('cloudinary_debug', 'No upload attempts yet');
+    $debugFile = storage_path('cloudinary_debug.txt');
+    
+    if (!file_exists($debugFile)) {
+        return response()->json([
+            'message' => 'No upload attempts yet (debug file does not exist)',
+            'instructions' => 'Upload an image via admin panel, then refresh this page to see the error',
+            'file_path' => $debugFile,
+        ]);
+    }
+    
+    // Read last 20 lines
+    $lines = file($debugFile);
+    $lastLines = array_slice($lines, -20);
     
     return response()->json([
-        'message' => $debug,
-        'session_id' => session()->getId(),
-        'instructions' => 'Upload an image via admin panel, then refresh this page to see the error',
+        'recent_uploads' => $lastLines,
+        'total_attempts' => count($lines),
+        'file_path' => $debugFile,
+        'instructions' => 'Each upload attempt is logged here with timestamp',
     ]);
 })->name('cloudinary.last.upload');
 

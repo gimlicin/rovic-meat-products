@@ -62,6 +62,12 @@ class AdminProductController extends Controller
 
         // Handle image upload
         $uploadDebug = [];
+        
+        // Debug: Check if file was even sent
+        if (!$request->hasFile('image')) {
+            file_put_contents(storage_path('cloudinary_debug.txt'), date('Y-m-d H:i:s') . ' - NO FILE: hasFile(image) returned false' . "\n", FILE_APPEND);
+        }
+        
         if ($request->hasFile('image')) {
             $uploadDebug['file_uploaded'] = true;
             $uploadDebug['file_name'] = $request->file('image')->getClientOriginalName();
@@ -83,8 +89,10 @@ class AdminProductController extends Controller
                 $uploadDebug['result'] = 'cloudinary_success';
                 $uploadDebug['url'] = $validated['image_url'];
                 
-                // Store success message in session
-                session()->flash('cloudinary_debug', 'Cloudinary upload SUCCESS! URL: ' . $validated['image_url']);
+                // Store success message in debug file AND session
+                $debugMsg = 'Cloudinary upload SUCCESS! URL: ' . $validated['image_url'];
+                file_put_contents(storage_path('cloudinary_debug.txt'), date('Y-m-d H:i:s') . ' - ' . $debugMsg . "\n", FILE_APPEND);
+                session()->flash('cloudinary_debug', $debugMsg);
             } catch (\Exception $e) {
                 $uploadDebug['result'] = 'cloudinary_failed';
                 $uploadDebug['error_message'] = $e->getMessage();
@@ -100,8 +108,10 @@ class AdminProductController extends Controller
                 $validated['image_url'] = '/storage/' . $path;
                 $uploadDebug['fallback_path'] = $validated['image_url'];
                 
-                // Store error in session
-                session()->flash('cloudinary_debug', 'Cloudinary FAILED: ' . $e->getMessage() . ' | Saved to local: ' . $validated['image_url']);
+                // Store error in debug file AND session
+                $debugMsg = 'Cloudinary FAILED: ' . $e->getMessage() . ' | Error Class: ' . get_class($e) . ' | Saved to local: ' . $validated['image_url'];
+                file_put_contents(storage_path('cloudinary_debug.txt'), date('Y-m-d H:i:s') . ' - ' . $debugMsg . "\n", FILE_APPEND);
+                session()->flash('cloudinary_debug', $debugMsg);
             }
         } elseif ($request->filled('image_url')) {
             // Keep existing image_url if provided (backward compatibility)
@@ -166,20 +176,13 @@ class AdminProductController extends Controller
         ]);
 
         // Handle image upload
+        if (!$request->hasFile('image')) {
+            file_put_contents(storage_path('cloudinary_debug.txt'), date('Y-m-d H:i:s') . ' - UPDATE: NO FILE sent' . "\n", FILE_APPEND);
+        }
+        
         if ($request->hasFile('image')) {
             try {
-                // CRITICAL: Log to stderr for Docker/Render visibility
-                error_log('🔄 CLOUDINARY (UPDATE): Upload attempt starting...');
-                error_log('📸 File: ' . $request->file('image')->getClientOriginalName());
-                error_log('🆔 Product ID: ' . $product->id);
-                error_log('☁️ Cloud: ' . config('cloudinary.cloud_name'));
-                
-                \Log::error('🔄 CLOUDINARY DEBUG: Attempting upload (update)', [
-                    'file_name' => $request->file('image')->getClientOriginalName(),
-                    'product_id' => $product->id,
-                    'cloud_name' => config('cloudinary.cloud_name'),
-                    'api_key' => config('cloudinary.api_key'),
-                ]);
+                file_put_contents(storage_path('cloudinary_debug.txt'), date('Y-m-d H:i:s') . ' - UPDATE: Starting Cloudinary upload for product #' . $product->id . "\n", FILE_APPEND);
                 
                 // Upload to Cloudinary
                 $uploadedFile = Cloudinary::upload($request->file('image')->getRealPath(), [
@@ -188,8 +191,7 @@ class AdminProductController extends Controller
                 ]);
                 $validated['image_url'] = $uploadedFile->getSecurePath();
                 
-                error_log('✅ CLOUDINARY SUCCESS (UPDATE)! URL: ' . $validated['image_url']);
-                \Log::error('✅ CLOUDINARY SUCCESS (update)!', ['url' => $validated['image_url']]);
+                file_put_contents(storage_path('cloudinary_debug.txt'), date('Y-m-d H:i:s') . ' - UPDATE SUCCESS! URL: ' . $validated['image_url'] . "\n", FILE_APPEND);
                 
                 // Delete old local image if exists
                 if ($product->image_url && str_starts_with($product->image_url, '/storage/')) {
@@ -197,12 +199,9 @@ class AdminProductController extends Controller
                     \Storage::disk('public')->delete($oldPath);
                 }
             } catch (\Exception $e) {
-                error_log('❌ CLOUDINARY FAILED (UPDATE): ' . $e->getMessage());
+                $debugMsg = 'UPDATE FAILED: ' . $e->getMessage() . ' | Error Class: ' . get_class($e);
+                file_put_contents(storage_path('cloudinary_debug.txt'), date('Y-m-d H:i:s') . ' - ' . $debugMsg . "\n", FILE_APPEND);
                 
-                \Log::error('❌ CLOUDINARY UPLOAD FAILED (update)', [
-                    'error' => $e->getMessage(),
-                    'class' => get_class($e),
-                ]);
                 // Fallback to local storage
                 if ($product->image_url && str_starts_with($product->image_url, '/storage/')) {
                     $oldPath = str_replace('/storage/', '', $product->image_url);
@@ -213,8 +212,7 @@ class AdminProductController extends Controller
                 $path = $image->storeAs('products', $filename, 'public');
                 $validated['image_url'] = '/storage/' . $path;
                 
-                error_log('⚠️ FALLBACK (UPDATE): Saved to local storage: ' . $validated['image_url']);
-                \Log::info('⚠️ Using local storage fallback (update)', ['path' => $validated['image_url']]);
+                file_put_contents(storage_path('cloudinary_debug.txt'), date('Y-m-d H:i:s') . ' - UPDATE FALLBACK: ' . $validated['image_url'] . "\n", FILE_APPEND);
             }
         } elseif ($request->filled('image_url')) {
             // Keep existing image_url if provided
