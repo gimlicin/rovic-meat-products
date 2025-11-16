@@ -289,6 +289,51 @@ Route::get('/test-cloudinary-upload', function() {
     }
 })->name('test.cloudinary.upload');
 
+// Test Cloudinary configuration
+Route::get('/test-cloudinary-config', function() {
+    $results = [];
+    
+    // Test 1: Check env vars
+    $results['env_vars'] = [
+        'CLOUDINARY_URL' => env('CLOUDINARY_URL') ? 'SET (length: ' . strlen(env('CLOUDINARY_URL')) . ')' : 'NULL',
+        'CLOUDINARY_CLOUD_NAME' => env('CLOUDINARY_CLOUD_NAME') ?: 'NULL',
+        'CLOUDINARY_API_KEY' => env('CLOUDINARY_API_KEY') ?: 'NULL',
+        'CLOUDINARY_API_SECRET' => env('CLOUDINARY_API_SECRET') ? 'SET' : 'NULL',
+    ];
+    
+    // Test 2: Check config values
+    $results['config_values'] = [
+        'cloud_url' => config('cloudinary.cloud_url') ? 'SET' : 'NULL',
+        'cloud_name' => config('cloudinary.cloud_name') ?: 'NULL',
+        'api_key' => config('cloudinary.api_key') ?: 'NULL',
+        'api_secret' => config('cloudinary.api_secret') ? 'SET' : 'NULL',
+    ];
+    
+    // Test 3: Try to get Cloudinary instance
+    try {
+        $cloudinary = new \Cloudinary\Cloudinary();
+        $results['cloudinary_instance'] = 'SUCCESS - Instance created';
+        
+        // Try to get config from instance
+        try {
+            $config = $cloudinary->configuration;
+            $results['cloudinary_config'] = [
+                'cloud_name' => $config->cloud->cloudName ?? 'NULL',
+                'api_key' => $config->cloud->apiKey ?? 'NULL',
+                'api_secret' => $config->cloud->apiSecret ? 'SET' : 'NULL',
+            ];
+        } catch (\Exception $e) {
+            $results['cloudinary_config'] = 'ERROR: ' . $e->getMessage();
+        }
+    } catch (\Exception $e) {
+        $results['cloudinary_instance'] = 'FAILED: ' . $e->getMessage();
+        $results['error_class'] = get_class($e);
+        $results['error_trace'] = explode("\n", $e->getTraceAsString());
+    }
+    
+    return response()->json($results, 200, [], JSON_PRETTY_PRINT);
+})->name('test.cloudinary.config');
+
 // View Cloudinary upload debug info
 Route::get('/cloudinary-last-upload', function() {
     $debugFile = storage_path('cloudinary_debug.txt');
