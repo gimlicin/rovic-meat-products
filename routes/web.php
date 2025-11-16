@@ -217,3 +217,20 @@ Route::prefix('auth')->group(function () {
         ->where('provider', 'facebook|google')
         ->name('social.callback');
 });
+
+// Temporary debug route - remove after fixing Cloudinary
+Route::get('/debug-cloudinary', function() {
+    return response()->json([
+        'cloudinary_config' => [
+            'cloud_name' => config('cloudinary.cloud_name'),
+            'api_key' => config('cloudinary.api_key'),
+            'has_secret' => !empty(config('cloudinary.api_secret')),
+        ],
+        'env_direct' => [
+            'cloud_name' => env('CLOUDINARY_CLOUD_NAME'),
+            'api_key' => env('CLOUDINARY_API_KEY'),
+            'has_secret' => !empty(env('CLOUDINARY_API_SECRET')),
+        ],
+        'package_exists' => class_exists('CloudinaryLabs\CloudinaryLaravel\Facades\Cloudinary'),
+    ]);
+})->name('debug.cloudinary');
