@@ -55,6 +55,10 @@ php artisan config:clear || echo "Config clear failed"
 echo "Running database migrations..."
 php artisan migrate --force || echo "Migration failed, continuing..."
 
+# Seed database (creates admin user and sample data)
+echo "Seeding database..."
+php artisan db:seed --force || echo "Seeding failed, continuing..."
+
 # Link storage (for file uploads)
 echo "Linking storage..."
 php artisan storage:link || echo "Storage link already exists"
