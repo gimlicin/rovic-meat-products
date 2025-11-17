@@ -218,20 +218,42 @@ Route::prefix('auth')->group(function () {
         ->name('social.callback');
 });
 
-// Temporary debug route - remove after fixing Cloudinary
-Route::get('/test-throttle', function () {
+// DEBUG: Check throttle state for login
+Route::get('/debug-throttle/{email?}', function ($email = 'customer@example.com') {
     $throttle = app(\App\Services\LoginThrottleService::class);
-    $testKey = 'test_user';
     
-    // Test basic operations
-    $throttle->hit($testKey);
-    $attempts = $throttle->attempts($testKey);
+    // Generate the same throttle key as LoginRequest
+    $key = \Illuminate\Support\Str::transliterate(\Illuminate\Support\Str::lower($email).'|'.request()->ip());
+    
+    // Get current state
+    $attempts = $throttle->attempts($key);
+    $isLockedOut = $throttle->tooManyAttempts($key, 5);
+    $availableIn = $throttle->availableIn($key);
+    $lockoutCount = $throttle->lockoutCount($key);
+    
+    // Check cache table directly
+    $cacheRecords = \DB::table('cache')
+        ->where('key', 'like', '%login_throttle%')
+        ->get(['key', 'expiration'])
+        ->map(function($record) {
+            return [
+                'key' => $record->key,
+                'expires_at' => date('Y-m-d H:i:s', $record->expiration),
+                'seconds_until_expiry' => $record->expiration - time(),
+            ];
+        });
     
     return response()->json([
-        'cache_working' => true,
+        'throttle_key' => $key,
         'attempts' => $attempts,
+        'is_locked_out' => $isLockedOut,
+        'available_in_seconds' => $availableIn,
+        'lockout_count' => $lockoutCount,
         'cache_driver' => config('cache.default'),
-        'cache_store' => env('CACHE_STORE'),
+        'cache_connection' => config('cache.stores.database.connection'),
+        'cache_table' => config('cache.stores.database.table'),
+        'cache_records' => $cacheRecords,
+        'db_connection' => config('database.default'),
     ]);
 });
 
