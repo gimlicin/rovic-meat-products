@@ -14,7 +14,10 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        //
+        // Register LoginThrottleService as singleton
+        $this->app->singleton(\App\Services\LoginThrottleService::class, function ($app) {
+            return new \App\Services\LoginThrottleService();
+        });
     }
 
     /**
