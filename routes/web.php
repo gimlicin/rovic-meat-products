@@ -222,8 +222,8 @@ Route::prefix('auth')->group(function () {
 Route::get('/debug-throttle/{email?}', function ($email = 'customer@example.com') {
     $throttle = app(\App\Services\LoginThrottleService::class);
     
-    // Generate the same throttle key as LoginRequest
-    $key = \Illuminate\Support\Str::transliterate(\Illuminate\Support\Str::lower($email).'|'.request()->ip());
+    // Generate the same throttle key as LoginRequest (email only, no IP)
+    $key = \Illuminate\Support\Str::transliterate(\Illuminate\Support\Str::lower($email));
     
     // Get current state
     $attempts = $throttle->attempts($key);
