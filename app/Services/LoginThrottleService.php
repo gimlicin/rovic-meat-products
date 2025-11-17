@@ -36,24 +36,15 @@ class LoginThrottleService
     }
 
     /**
-     * Check if the key has too many attempts
+     * Check if the key has an active lockout
+     * NOTE: This should ONLY return true if there's an ACTIVE lockout
+     * Not just because attempts >= max (that check is done in LoginRequest)
      */
     public function tooManyAttempts(string $key, int $maxAttempts = 5): bool
     {
-        // FIRST: Check if there's an active lockout (most important!)
-        if (Cache::has($this->availableAtKey($key))) {
-            return true;
-        }
-        
-        // SECOND: Check attempt count
-        $attempts = $this->attempts($key);
-        
-        if ($attempts < $maxAttempts) {
-            return false;
-        }
-
-        // Has max attempts but no active lockout yet
-        return true;
+        // Only return true if there's an ACTIVE lockout
+        // The attempt count check is handled in LoginRequest::authenticate()
+        return Cache::has($this->availableAtKey($key));
     }
 
     /**
