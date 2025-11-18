@@ -477,30 +477,29 @@ export default function CheckoutSimple({ cartItems, total, paymentSettings = [] 
                         {/* Column 3 - Customer Info & Place Order */}
                         <div className="md:col-span-1">
                             {/* Customer Form */}
-                            <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-200">
-                            <h2 className="text-lg font-semibold mb-3 flex items-center gap-2">
-                                <span className="text-xl">👤</span> Customer Information
+                            <div className="bg-white p-3 rounded-lg shadow-sm border border-gray-200">
+                            <h2 className="text-sm font-semibold mb-2 flex items-center gap-1">
+                                <span className="text-base">👤</span> Customer Information
                             </h2>
                             
-                            <form onSubmit={handleSubmit} className="space-y-3">
+                            <form onSubmit={handleSubmit} className="space-y-2">
 
-                                <div className="space-y-3">
                                     <div>
-                                        <label className="block text-xs font-medium mb-1">Full Name *</label>
+                                        <label className="block text-xs font-medium mb-0.5">Full Name *</label>
                                         <input
                                             type="text"
                                             value={data.customer_name}
                                             onChange={(e) => setData('customer_name', e.target.value)}
-                                            className="w-full p-2 text-sm border rounded-lg"
+                                            className="w-full p-1.5 text-xs border rounded"
                                             placeholder="Enter your full name"
                                         />
                                         {errors.customer_name && (
-                                            <p className="text-red-500 text-sm mt-1">{errors.customer_name}</p>
+                                            <p className="text-red-500 text-xs mt-0.5">{errors.customer_name}</p>
                                         )}
                                     </div>
 
                                     <div>
-                                        <label className="block text-xs font-medium mb-1">Phone Number *</label>
+                                        <label className="block text-xs font-medium mb-0.5">Phone Number *</label>
                                         <input
                                             type="tel"
                                             value={data.customer_phone}
@@ -508,91 +507,90 @@ export default function CheckoutSimple({ cartItems, total, paymentSettings = [] 
                                                 const value = e.target.value.replace(/[^0-9+\-() ]/g, '');
                                                 setData('customer_phone', value);
                                             }}
-                                            className="w-full p-2 text-sm border rounded-lg"
+                                            className="w-full p-1.5 text-xs border rounded"
                                             placeholder="09XX XXX XXXX"
                                         />
                                         {errors.customer_phone && (
-                                            <p className="text-red-500 text-sm mt-1">{errors.customer_phone}</p>
+                                            <p className="text-red-500 text-xs mt-0.5">{errors.customer_phone}</p>
                                         )}
                                     </div>
-                                </div>
 
                                 <div>
-                                    <label className="block text-xs font-medium mb-1">Email Address (Optional)</label>
+                                    <label className="block text-xs font-medium mb-0.5">Email (Optional)</label>
                                     <input
                                         type="email"
                                         value={data.customer_email}
                                         onChange={(e) => setData('customer_email', e.target.value)}
-                                        className="w-full p-2 text-sm border rounded-lg"
+                                        className="w-full p-1.5 text-xs border rounded"
                                         placeholder="your@email.com"
                                     />
                                     {errors.customer_email && (
-                                        <p className="text-red-500 text-sm mt-1">{errors.customer_email}</p>
+                                        <p className="text-red-500 text-xs mt-0.5">{errors.customer_email}</p>
                                     )}
                                 </div>
 
                                 {/* Delivery Address Fields */}
                                 {data.pickup_or_delivery === 'delivery' && (
                                     <>
-                                        <div className="border-t pt-3">
-                                            <h3 className="text-sm font-semibold text-gray-900 mb-2 flex items-center gap-1">
+                                        <div className="border-t pt-2">
+                                            <h3 className="text-xs font-semibold text-gray-900 mb-1 flex items-center gap-1">
                                                 📍 Delivery Address
                                             </h3>
                                         </div>
                                         
-                                        <div className="space-y-3">
+                                        <div className="space-y-2">
                                             <div>
-                                                <label className="block text-xs font-medium mb-1">Street Address *</label>
+                                                <label className="block text-xs font-medium mb-0.5">Street Address *</label>
                                                 <input
                                                     type="text"
                                                     value={data.delivery_address}
                                                     onChange={(e) => setData('delivery_address', e.target.value)}
-                                                    className="w-full p-2 text-sm border rounded-lg"
+                                                    className="w-full p-1.5 text-xs border rounded"
                                                     placeholder="House #, Street name"
                                                     required={data.pickup_or_delivery === 'delivery'}
                                                 />
                                                 {errors.delivery_address && (
-                                                    <p className="text-red-500 text-sm mt-1">{errors.delivery_address}</p>
+                                                    <p className="text-red-500 text-xs mt-0.5">{errors.delivery_address}</p>
                                                 )}
                                             </div>
 
                                             <div>
-                                                <label className="block text-xs font-medium mb-1">Barangay *</label>
+                                                <label className="block text-xs font-medium mb-0.5">Barangay *</label>
                                                 <input
                                                     type="text"
                                                     value={data.delivery_barangay}
                                                     onChange={(e) => setData('delivery_barangay', e.target.value)}
-                                                    className="w-full p-2 text-sm border rounded-lg"
+                                                    className="w-full p-1.5 text-xs border rounded"
                                                     placeholder="Barangay name"
                                                     required={data.pickup_or_delivery === 'delivery'}
                                                 />
                                                 {errors.delivery_barangay && (
-                                                    <p className="text-red-500 text-sm mt-1">{errors.delivery_barangay}</p>
+                                                    <p className="text-red-500 text-xs mt-0.5">{errors.delivery_barangay}</p>
                                                 )}
                                             </div>
 
                                             <div>
-                                                <label className="block text-xs font-medium mb-1">City *</label>
+                                                <label className="block text-xs font-medium mb-0.5">City *</label>
                                                 <input
                                                     type="text"
                                                     value={data.delivery_city}
                                                     onChange={(e) => setData('delivery_city', e.target.value)}
-                                                    className="w-full p-2 text-sm border rounded-lg"
+                                                    className="w-full p-1.5 text-xs border rounded"
                                                     placeholder="City name"
                                                     required={data.pickup_or_delivery === 'delivery'}
                                                 />
                                                 {errors.delivery_city && (
-                                                    <p className="text-red-500 text-sm mt-1">{errors.delivery_city}</p>
+                                                    <p className="text-red-500 text-xs mt-0.5">{errors.delivery_city}</p>
                                                 )}
                                             </div>
                                         </div>
 
                                         <div>
-                                            <label className="block text-xs font-medium mb-1">Delivery Instructions (Optional)</label>
+                                            <label className="block text-xs font-medium mb-0.5">Delivery Instructions (Optional)</label>
                                             <textarea
                                                 value={data.delivery_instructions}
                                                 onChange={(e) => setData('delivery_instructions', e.target.value)}
-                                                className="w-full p-2 text-sm border rounded-lg"
+                                                className="w-full p-1.5 text-xs border rounded"
                                                 rows={2}
                                                 placeholder="e.g., Leave at gate, call upon arrival"
                                             />
@@ -601,8 +599,8 @@ export default function CheckoutSimple({ cartItems, total, paymentSettings = [] 
                                 )}
 
                                 {/* Senior Citizen Discount */}
-                                <div className="pt-3 border-t">
-                                    <div className="flex items-start space-x-2 p-2 bg-amber-50 rounded border border-amber-200">
+                                <div className="pt-2 border-t">
+                                    <div className="flex items-start space-x-1.5 p-1.5 bg-amber-50 rounded border border-amber-200">
                                         <input
                                             type="checkbox"
                                             id="senior-citizen"
@@ -630,11 +628,11 @@ export default function CheckoutSimple({ cartItems, total, paymentSettings = [] 
                                 </div>
 
                                 <div>
-                                    <label className="block text-xs font-medium mb-1">Special Instructions (Optional)</label>
+                                    <label className="block text-xs font-medium mb-0.5">Special Instructions (Optional)</label>
                                     <textarea
                                         value={data.notes}
                                         onChange={(e) => setData('notes', e.target.value)}
-                                        className="w-full p-2 text-sm border rounded-lg"
+                                        className="w-full p-1.5 text-xs border rounded"
                                         rows={2}
                                         placeholder="Any special instructions for your order..."
                                     />
@@ -679,7 +677,7 @@ export default function CheckoutSimple({ cartItems, total, paymentSettings = [] 
                                 <button
                                     type="submit"
                                     disabled={processing || ((data.payment_method !== 'cash' && data.payment_method !== null) && !paymentProof) || !data.terms_accepted}
-                                    className="w-full bg-red-600 text-white py-3 px-4 rounded-lg font-semibold hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed text-sm transition-colors shadow-md"
+                                    className="w-full bg-red-600 text-white py-2 px-3 rounded font-semibold hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed text-xs transition-colors shadow-md"
                                 >
                                     {processing ? '⏳ Processing Your Order...' : '🛒 Place Order'}
                                 </button>
