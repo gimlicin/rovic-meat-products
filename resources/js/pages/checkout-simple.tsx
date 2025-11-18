@@ -140,11 +140,11 @@ export default function CheckoutSimple({ cartItems, total, paymentSettings = [] 
                     <h1 className="text-3xl font-bold mb-6">Checkout</h1>
 
                     {/* 3-Column Layout - Inspired by The Good Meats */}
-                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                         {/* Column 1 - Order Summary */}
-                        <div className="lg:col-span-1">
+                        <div className="md:col-span-1">
                             {/* Order Summary */}
-                            <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-200 sticky top-8">
+                            <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-200 sticky top-8 max-h-[calc(100vh-100px)] overflow-y-auto">
                                 <h2 className="text-lg font-semibold mb-3 flex items-center gap-2">
                                     <span className="text-xl">🛍️</span> Order Summary
                                 </h2>
@@ -219,7 +219,7 @@ export default function CheckoutSimple({ cartItems, total, paymentSettings = [] 
                         {/* End Column 1 */}
 
                         {/* Column 2 - Delivery & Payment */}
-                        <div className="lg:col-span-1 space-y-4">
+                        <div className="md:col-span-1 space-y-4">
                             {/* Delivery Options */}
                             <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-200">
                                 <h2 className="text-lg font-semibold mb-3 flex items-center gap-2">
@@ -475,7 +475,7 @@ export default function CheckoutSimple({ cartItems, total, paymentSettings = [] 
                         {/* End Column 2 */}
 
                         {/* Column 3 - Customer Info & Place Order */}
-                        <div className="lg:col-span-1">
+                        <div className="md:col-span-1">
                             {/* Customer Form */}
                             <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-200">
                             <h2 className="text-lg font-semibold mb-3 flex items-center gap-2">
