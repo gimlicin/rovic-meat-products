@@ -144,30 +144,30 @@ export default function CheckoutSimple({ cartItems, total, paymentSettings = [] 
                         {/* Column 1 - Order Summary */}
                         <div className="lg:col-span-1">
                             {/* Order Summary */}
-                            <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200 sticky top-8">
-                                <h2 className="text-xl font-semibold mb-5 flex items-center gap-2">
-                                    <span className="text-2xl">🛍️</span> Order Summary
+                            <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-200 sticky top-8">
+                                <h2 className="text-lg font-semibold mb-3 flex items-center gap-2">
+                                    <span className="text-xl">🛍️</span> Order Summary
                                 </h2>
                                 
                                 {/* Order Items */}
-                                <div className="space-y-4 mb-5">
+                                <div className="space-y-2 mb-3">
                                     {cartItems.map((item, index) => (
-                                        <div key={index} className="flex gap-3 py-3 border-b last:border-0">
+                                        <div key={index} className="flex gap-2 py-2 border-b last:border-0">
                                             {/* Product Image */}
                                             {item.product.image_url && (
                                                 <img
                                                     src={item.product.image_url}
                                                     alt={item.product.name}
-                                                    className="w-16 h-16 object-cover rounded-lg"
+                                                    className="w-12 h-12 object-cover rounded-md"
                                                 />
                                             )}
                                             {/* Product Details */}
                                             <div className="flex-1">
-                                                <h4 className="font-medium text-sm leading-tight">{item.product.name}</h4>
-                                                <p className="text-sm text-gray-600 mt-1">
+                                                <h4 className="font-medium text-xs leading-tight">{item.product.name}</h4>
+                                                <p className="text-xs text-gray-600 mt-0.5">
                                                     {item.quantity} × ₱{Number(item.price).toFixed(2)}
                                                 </p>
-                                                <p className="text-sm font-semibold text-orange-600 mt-1">
+                                                <p className="text-xs font-semibold text-orange-600 mt-0.5">
                                                     ₱{Number(item.total).toFixed(2)}
                                                 </p>
                                             </div>
@@ -176,39 +176,39 @@ export default function CheckoutSimple({ cartItems, total, paymentSettings = [] 
                                 </div>
                                 
                                 {/* Summary Calculations */}
-                                <div className="space-y-3 pt-5 border-t">
-                                    <div className="flex justify-between items-center text-base">
+                                <div className="space-y-2 pt-3 border-t">
+                                    <div className="flex justify-between items-center text-sm">
                                         <span className="text-gray-600">Subtotal</span>
                                         <span className="font-semibold">₱{Number(total).toFixed(2)}</span>
                                     </div>
                                     
                                     {isSeniorCitizen && (
-                                        <div className="flex justify-between items-center text-base">
+                                        <div className="flex justify-between items-center text-sm">
                                             <span className="text-green-600">Senior Discount (20%)</span>
                                             <span className="font-semibold text-green-600">-₱{discountAmount.toFixed(2)}</span>
                                         </div>
                                     )}
                                     
-                                    <div className="border-t pt-3"></div>
+                                    <div className="border-t pt-2"></div>
                                     
                                     <div className="flex justify-between items-center">
-                                        <span className="text-lg font-bold">Total</span>
-                                        <span className="text-2xl font-bold text-orange-600">₱{finalTotal.toFixed(2)}</span>
+                                        <span className="text-base font-bold">Total</span>
+                                        <span className="text-xl font-bold text-orange-600">₱{finalTotal.toFixed(2)}</span>
                                     </div>
                                     
                                     {isSeniorCitizen && (
-                                        <div className="mt-3 p-3 bg-amber-50 border border-amber-200 rounded-lg">
-                                            <p className="text-sm text-amber-800">
-                                                📋 <strong>Note:</strong> Present valid Senior Citizen ID upon delivery/pickup
+                                        <div className="mt-2 p-2 bg-amber-50 border border-amber-200 rounded">
+                                            <p className="text-xs text-amber-800">
+                                                📋 <strong>Note:</strong> Present valid ID upon delivery/pickup
                                             </p>
                                         </div>
                                     )}
                                 </div>
 
                                 {/* Secure Checkout Badge */}
-                                <div className="mt-6 pt-6 border-t">
-                                    <div className="flex items-center justify-center gap-2 text-sm text-gray-600">
-                                        <svg className="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <div className="mt-4 pt-3 border-t">
+                                    <div className="flex items-center justify-center gap-1 text-xs text-gray-600">
+                                        <svg className="w-4 h-4 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
                                         </svg>
                                         <span>Secure Checkout</span>
@@ -219,14 +219,14 @@ export default function CheckoutSimple({ cartItems, total, paymentSettings = [] 
                         {/* End Column 1 */}
 
                         {/* Column 2 - Delivery & Payment */}
-                        <div className="lg:col-span-1 space-y-6">
+                        <div className="lg:col-span-1 space-y-4">
                             {/* Delivery Options */}
-                            <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
-                                <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
-                                    <span className="text-2xl">🚚</span> Delivery Options
+                            <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-200">
+                                <h2 className="text-lg font-semibold mb-3 flex items-center gap-2">
+                                    <span className="text-xl">🚚</span> Delivery Options
                                 </h2>
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <label className={`flex items-center p-4 border-2 rounded-lg cursor-pointer transition-colors ${
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                            <label className={`flex items-center p-3 border-2 rounded-lg cursor-pointer transition-colors ${
                                 data.pickup_or_delivery === 'pickup' 
                                     ? 'border-red-500 bg-red-50' 
                                     : 'border-gray-200 hover:border-gray-300'
@@ -291,17 +291,17 @@ export default function CheckoutSimple({ cartItems, total, paymentSettings = [] 
                             </div>
 
                             {/* QR Code Payment Section */}
-                            <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
-                                <h3 className="text-xl font-semibold mb-4 flex items-center gap-2">
-                                    <span className="text-2xl">💳</span> Payment Method
+                            <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-200">
+                                <h3 className="text-lg font-semibold mb-3 flex items-center gap-2">
+                                    <span className="text-xl">💳</span> Payment Method
                                 </h3>
                                 
                                 {paymentSettings.length > 0 ? (
-                                    <div className="space-y-4">
+                                    <div className="space-y-3">
                                         {/* Payment Method Selection */}
                                         <div>
-                                            <h4 className="text-base font-medium text-gray-900 mb-3">Choose Your Payment Method:</h4>
-                                            <div className="space-y-3">
+                                            <h4 className="text-sm font-medium text-gray-900 mb-2">Choose Your Payment Method:</h4>
+                                            <div className="space-y-2">
                                                 {/* Cash on Delivery Option */}
                                                 <label
                                                     className={`flex items-center p-4 border-2 rounded-lg cursor-pointer transition-all ${
@@ -358,8 +358,8 @@ export default function CheckoutSimple({ cartItems, total, paymentSettings = [] 
 
                                         {/* Display Selected Payment Method Details */}
                                         {selectedPaymentMethod && paymentSettings.find(s => s.id === selectedPaymentMethod) && (
-                                            <div className="border-2 border-orange-300 rounded-lg p-5 bg-orange-50">
-                                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                            <div className="border-2 border-orange-300 rounded-lg p-3 bg-orange-50">
+                                                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                                                     {/* QR Code Display */}
                                                     {paymentSettings.find(s => s.id === selectedPaymentMethod)?.qr_code_url && (
                                                         <div className="bg-white p-4 rounded-lg shadow-sm text-center">
@@ -477,21 +477,21 @@ export default function CheckoutSimple({ cartItems, total, paymentSettings = [] 
                         {/* Column 3 - Customer Info & Place Order */}
                         <div className="lg:col-span-1">
                             {/* Customer Form */}
-                            <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
-                            <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
-                                <span className="text-2xl">👤</span> Customer Information
+                            <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-200">
+                            <h2 className="text-lg font-semibold mb-3 flex items-center gap-2">
+                                <span className="text-xl">👤</span> Customer Information
                             </h2>
                             
-                            <form onSubmit={handleSubmit} className="space-y-5">
+                            <form onSubmit={handleSubmit} className="space-y-3">
 
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div className="space-y-3">
                                     <div>
-                                        <label className="block text-sm font-medium mb-2">Full Name *</label>
+                                        <label className="block text-xs font-medium mb-1">Full Name *</label>
                                         <input
                                             type="text"
                                             value={data.customer_name}
                                             onChange={(e) => setData('customer_name', e.target.value)}
-                                            className="w-full p-3 border rounded-lg"
+                                            className="w-full p-2 text-sm border rounded-lg"
                                             placeholder="Enter your full name"
                                         />
                                         {errors.customer_name && (
@@ -500,7 +500,7 @@ export default function CheckoutSimple({ cartItems, total, paymentSettings = [] 
                                     </div>
 
                                     <div>
-                                        <label className="block text-sm font-medium mb-2">Phone Number *</label>
+                                        <label className="block text-xs font-medium mb-1">Phone Number *</label>
                                         <input
                                             type="tel"
                                             value={data.customer_phone}
@@ -508,7 +508,7 @@ export default function CheckoutSimple({ cartItems, total, paymentSettings = [] 
                                                 const value = e.target.value.replace(/[^0-9+\-() ]/g, '');
                                                 setData('customer_phone', value);
                                             }}
-                                            className="w-full p-3 border rounded-lg"
+                                            className="w-full p-2 text-sm border rounded-lg"
                                             placeholder="09XX XXX XXXX"
                                         />
                                         {errors.customer_phone && (
@@ -518,12 +518,12 @@ export default function CheckoutSimple({ cartItems, total, paymentSettings = [] 
                                 </div>
 
                                 <div>
-                                    <label className="block text-sm font-medium mb-2">Email Address (Optional)</label>
+                                    <label className="block text-xs font-medium mb-1">Email Address (Optional)</label>
                                     <input
                                         type="email"
                                         value={data.customer_email}
                                         onChange={(e) => setData('customer_email', e.target.value)}
-                                        className="w-full p-3 border rounded-lg"
+                                        className="w-full p-2 text-sm border rounded-lg"
                                         placeholder="your@email.com"
                                     />
                                     {errors.customer_email && (
@@ -534,20 +534,20 @@ export default function CheckoutSimple({ cartItems, total, paymentSettings = [] 
                                 {/* Delivery Address Fields */}
                                 {data.pickup_or_delivery === 'delivery' && (
                                     <>
-                                        <div className="border-t pt-4">
-                                            <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                                        <div className="border-t pt-3">
+                                            <h3 className="text-sm font-semibold text-gray-900 mb-2 flex items-center gap-1">
                                                 📍 Delivery Address
                                             </h3>
                                         </div>
                                         
-                                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                        <div className="space-y-3">
                                             <div>
-                                                <label className="block text-sm font-medium mb-2">Street Address *</label>
+                                                <label className="block text-xs font-medium mb-1">Street Address *</label>
                                                 <input
                                                     type="text"
                                                     value={data.delivery_address}
                                                     onChange={(e) => setData('delivery_address', e.target.value)}
-                                                    className="w-full p-3 border rounded-lg"
+                                                    className="w-full p-2 text-sm border rounded-lg"
                                                     placeholder="House #, Street name"
                                                     required={data.pickup_or_delivery === 'delivery'}
                                                 />
@@ -557,12 +557,12 @@ export default function CheckoutSimple({ cartItems, total, paymentSettings = [] 
                                             </div>
 
                                             <div>
-                                                <label className="block text-sm font-medium mb-2">Barangay *</label>
+                                                <label className="block text-xs font-medium mb-1">Barangay *</label>
                                                 <input
                                                     type="text"
                                                     value={data.delivery_barangay}
                                                     onChange={(e) => setData('delivery_barangay', e.target.value)}
-                                                    className="w-full p-3 border rounded-lg"
+                                                    className="w-full p-2 text-sm border rounded-lg"
                                                     placeholder="Barangay name"
                                                     required={data.pickup_or_delivery === 'delivery'}
                                                 />
@@ -572,12 +572,12 @@ export default function CheckoutSimple({ cartItems, total, paymentSettings = [] 
                                             </div>
 
                                             <div>
-                                                <label className="block text-sm font-medium mb-2">City *</label>
+                                                <label className="block text-xs font-medium mb-1">City *</label>
                                                 <input
                                                     type="text"
                                                     value={data.delivery_city}
                                                     onChange={(e) => setData('delivery_city', e.target.value)}
-                                                    className="w-full p-3 border rounded-lg"
+                                                    className="w-full p-2 text-sm border rounded-lg"
                                                     placeholder="City name"
                                                     required={data.pickup_or_delivery === 'delivery'}
                                                 />
@@ -588,12 +588,12 @@ export default function CheckoutSimple({ cartItems, total, paymentSettings = [] 
                                         </div>
 
                                         <div>
-                                            <label className="block text-sm font-medium mb-2">Delivery Instructions (Optional)</label>
+                                            <label className="block text-xs font-medium mb-1">Delivery Instructions (Optional)</label>
                                             <textarea
                                                 value={data.delivery_instructions}
                                                 onChange={(e) => setData('delivery_instructions', e.target.value)}
-                                                className="w-full p-3 border rounded-lg"
-                                                rows={3}
+                                                className="w-full p-2 text-sm border rounded-lg"
+                                                rows={2}
                                                 placeholder="e.g., Leave at gate, call upon arrival"
                                             />
                                         </div>
@@ -601,8 +601,8 @@ export default function CheckoutSimple({ cartItems, total, paymentSettings = [] 
                                 )}
 
                                 {/* Senior Citizen Discount */}
-                                <div className="pt-4 border-t">
-                                    <div className="flex items-start space-x-3 p-4 bg-amber-50 rounded-lg border border-amber-200">
+                                <div className="pt-3 border-t">
+                                    <div className="flex items-start space-x-2 p-2 bg-amber-50 rounded border border-amber-200">
                                         <input
                                             type="checkbox"
                                             id="senior-citizen"
@@ -611,17 +611,17 @@ export default function CheckoutSimple({ cartItems, total, paymentSettings = [] 
                                                 setIsSeniorCitizen(e.target.checked);
                                                 setData('is_senior_citizen', e.target.checked);
                                             }}
-                                            className="mt-1 h-5 w-5 rounded border-amber-300"
+                                            className="mt-0.5 h-4 w-4 rounded border-amber-300"
                                         />
                                         <div className="flex-1">
-                                            <label htmlFor="senior-citizen" className="cursor-pointer text-sm font-semibold text-gray-900 block">
+                                            <label htmlFor="senior-citizen" className="cursor-pointer text-xs font-semibold text-gray-900 block">
                                                 Senior Citizen / PWD Discount (20%)
                                             </label>
-                                            <p className="text-xs text-gray-600 mt-1">
-                                                Valid ID must be presented upon delivery/pickup
+                                            <p className="text-xs text-gray-600">
+                                                Valid ID must be presented
                                             </p>
                                             {isSeniorCitizen && (
-                                                <p className="text-sm font-semibold text-green-700 mt-2">
+                                                <p className="text-xs font-semibold text-green-700 mt-1">
                                                     ✓ You'll save ₱{discountAmount.toFixed(2)}
                                                 </p>
                                             )}
@@ -630,32 +630,31 @@ export default function CheckoutSimple({ cartItems, total, paymentSettings = [] 
                                 </div>
 
                                 <div>
-                                    <label className="block text-sm font-medium mb-2">Special Instructions (Optional)</label>
+                                    <label className="block text-xs font-medium mb-1">Special Instructions (Optional)</label>
                                     <textarea
                                         value={data.notes}
                                         onChange={(e) => setData('notes', e.target.value)}
-                                        className="w-full p-3 border rounded-lg"
-                                        rows={3}
+                                        className="w-full p-2 text-sm border rounded-lg"
+                                        rows={2}
                                         placeholder="Any special instructions for your order..."
                                     />
                                 </div>
 
                                 {/* Terms and Conditions */}
-                                <div className="bg-gray-50 p-4 rounded-lg border">
-                                    <div className="mb-3">
-                                        <h4 className="font-semibold text-gray-800 mb-2">Terms and Conditions</h4>
-                                        <div className="text-sm text-gray-600 space-y-2">
+                                <div className="bg-gray-50 p-2 rounded border">
+                                    <div className="mb-2">
+                                        <h4 className="text-xs font-semibold text-gray-800 mb-1">Terms and Conditions</h4>
+                                        <div className="text-xs text-gray-600 space-y-1">
                                             <div>
                                                 <strong>Return Policy:</strong> Products marked as promotional/promo items are not eligible for returns. All other products may be returned within our standard return window.
                                             </div>
                                             <div>
                                                 <strong>Cancellation Policy:</strong> To cancel your order, please contact us directly via:
-                                                <ul className="list-disc list-inside mt-1 ml-4">
+                                                <ul className="list-disc list-inside ml-2 text-xs">
                                                     <li>Facebook: Rovic Meat Products</li>
                                                     <li>Phone: +63 936 554 3854</li>
-                                                    <li>Email: Kxrstynbasan2@gmail.com with your order details</li>
+                                                    <li>Email: Kxrstynbasan2@gmail.com</li>
                                                 </ul>
-                                                <p className="text-xs mt-1 italic">We personally handle all customer inquiries to ensure the best service.</p>
                                             </div>
                                             <div>
                                                 <strong>Delivery Fee:</strong> Customers will shoulder the delivery fee. The final amount may vary depending on delivery location and order size.
@@ -671,8 +670,8 @@ export default function CheckoutSimple({ cartItems, total, paymentSettings = [] 
                                             className="h-4 w-4 text-red-600 focus:ring-red-500 border-gray-300 rounded mt-0.5"
                                             required
                                         />
-                                        <label htmlFor="terms_accepted" className="ml-2 text-sm text-gray-700">
-                                            I have read and agree to the <strong>Terms and Conditions</strong> including the return and cancellation policies above.
+                                        <label htmlFor="terms_accepted" className="ml-2 text-xs text-gray-700">
+                                            I have read and agree to the <strong>Terms and Conditions</strong> above.
                                         </label>
                                     </div>
                                 </div>
@@ -680,7 +679,7 @@ export default function CheckoutSimple({ cartItems, total, paymentSettings = [] 
                                 <button
                                     type="submit"
                                     disabled={processing || ((data.payment_method !== 'cash' && data.payment_method !== null) && !paymentProof) || !data.terms_accepted}
-                                    className="w-full bg-red-600 text-white py-4 px-6 rounded-lg font-semibold hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed text-base transition-colors shadow-md"
+                                    className="w-full bg-red-600 text-white py-3 px-4 rounded-lg font-semibold hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed text-sm transition-colors shadow-md"
                                 >
                                     {processing ? '⏳ Processing Your Order...' : '🛒 Place Order'}
                                 </button>
