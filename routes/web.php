@@ -12,6 +12,9 @@ Route::get('/', [ProductController::class, 'home'])->name('home');
 Route::get('/privacy-policy', function () {
     return Inertia::render('privacy-policy');
 })->name('privacy-policy');
+Route::get('/data-deletion', function () {
+    return Inertia::render('data-deletion');
+})->name('data-deletion');
 Route::get('/products', [ProductController::class, 'catalog'])->name('products.index');
 Route::get('/products/{product}', [ProductController::class, 'show'])->name('products.show');
 Route::get('/categories', [CategoryController::class, 'index'])->name('categories.index');
