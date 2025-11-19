@@ -270,7 +270,15 @@ class OrderController extends Controller
                 'pickup_or_delivery' => $request->input('pickup_or_delivery', 'pickup'),
                 'payment_method' => $normalizedPaymentMethod,
                 'payment_status' => Order::PAYMENT_STATUS_PENDING,
-                'notes' => $request->input('notes', '')
+                'notes' => $request->input('notes', ''),
+                // Delivery address fields (only used when pickup_or_delivery = 'delivery')
+                'delivery_address' => $request->input('delivery_address'),
+                'delivery_barangay' => $request->input('delivery_barangay'),
+                'delivery_city' => $request->input('delivery_city'),
+                'delivery_instructions' => $request->input('delivery_instructions'),
+                // Additional fields from checkout form
+                'is_senior_citizen' => $request->input('is_senior_citizen', false),
+                'is_bulk_order' => $request->input('is_bulk_order', false)
             ];
             
             // If payment proof was uploaded, add to order data

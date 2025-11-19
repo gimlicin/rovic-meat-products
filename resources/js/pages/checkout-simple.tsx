@@ -39,8 +39,8 @@ export default function CheckoutSimple({ cartItems, total, paymentSettings = [] 
     const [selectedPaymentMethod, setSelectedPaymentMethod] = useState<number | null>(null); // Default to cash (null)
     const [showInstructions, setShowInstructions] = useState<boolean>(false);
 
-    // Calculate senior discount (20% as mandated by RA 9994)
-    const SENIOR_DISCOUNT_RATE = 0.20;
+    // Calculate senior discount (5% discount)
+    const SENIOR_DISCOUNT_RATE = 0.05;
     const discountAmount = isSeniorCitizen ? total * SENIOR_DISCOUNT_RATE : 0;
     const finalTotal = total - discountAmount;
 
@@ -184,7 +184,7 @@ export default function CheckoutSimple({ cartItems, total, paymentSettings = [] 
                                     
                                     {isSeniorCitizen && (
                                         <div className="flex justify-between items-center text-sm">
-                                            <span className="text-green-600">Senior Discount (20%)</span>
+                                            <span className="text-green-600">Senior Discount (5%)</span>
                                             <span className="font-semibold text-green-600">-₱{discountAmount.toFixed(2)}</span>
                                         </div>
                                     )}
@@ -498,16 +498,17 @@ export default function CheckoutSimple({ cartItems, total, paymentSettings = [] 
                                     </div>
 
                                     <div>
-                                        <label className="block text-xs font-medium mb-1">Phone Number *</label>
+                                        <label className="block text-xs font-medium mb-1">Phone Number * (11 digits)</label>
                                         <input
                                             type="tel"
                                             value={data.customer_phone}
                                             onChange={(e) => {
-                                                const value = e.target.value.replace(/[^0-9+\-() ]/g, '');
+                                                const value = e.target.value.replace(/[^0-9]/g, '').slice(0, 11);
                                                 setData('customer_phone', value);
                                             }}
                                             className="w-full p-2 text-sm border rounded-lg"
-                                            placeholder="09XX XXX XXXX"
+                                            placeholder="09XXXXXXXXX"
+                                            maxLength={11}
                                         />
                                         {errors.customer_phone && (
                                             <p className="text-red-500 text-xs mt-0.5">{errors.customer_phone}</p>
@@ -612,7 +613,7 @@ export default function CheckoutSimple({ cartItems, total, paymentSettings = [] 
                                         />
                                         <div className="flex-1">
                                             <label htmlFor="senior-citizen" className="cursor-pointer text-xs font-semibold text-gray-900 block">
-                                                Senior Citizen / PWD Discount (20%)
+                                                Senior Citizen / PWD Discount (5%)
                                             </label>
                                             <p className="text-xs text-gray-600">
                                                 Valid ID must be presented
