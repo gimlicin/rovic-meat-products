@@ -260,25 +260,23 @@ class OrderController extends Controller
             ]);
             
             // Create order with calculated total + OPTIONAL payment proof
+            // ONLY use fields that DEFINITELY exist in production database
             $orderData = [
                 'user_id' => auth()->id(), // Associate with logged-in user
                 'customer_name' => $request->input('customer_name', 'Order Customer'),
                 'customer_phone' => $request->input('customer_phone', '09123456789'),
                 'customer_email' => $request->input('customer_email'),
                 'status' => Order::STATUS_PENDING,
-                'total_amount' => $total > 0 ? $total : 100.00, // REVERT: Production DB has 'total_amount'
+                'total_amount' => $total > 0 ? $total : 100.00, // Production DB has 'total_amount'
                 'pickup_or_delivery' => $request->input('pickup_or_delivery', 'pickup'),
                 'payment_method' => $normalizedPaymentMethod,
                 'payment_status' => Order::PAYMENT_STATUS_PENDING,
                 'notes' => $request->input('notes', ''),
-                // Delivery address fields (only used when pickup_or_delivery = 'delivery')
+                // Only include delivery_address (single field) - safe to assume it exists
                 'delivery_address' => $request->input('delivery_address'),
-                'delivery_barangay' => $request->input('delivery_barangay'),
-                'delivery_city' => $request->input('delivery_city'),
-                'delivery_instructions' => $request->input('delivery_instructions'),
-                // Additional fields from checkout form
-                'is_senior_citizen' => $request->input('is_senior_citizen', false),
-                'is_bulk_order' => $request->input('is_bulk_order', false)
+                // REMOVED all other fields that may not exist in production DB:
+                // - delivery_barangay, delivery_city, delivery_instructions 
+                // - is_senior_citizen, is_bulk_order
             ];
             
             // If payment proof was uploaded, add to order data
