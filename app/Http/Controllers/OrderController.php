@@ -24,7 +24,7 @@ use Inertia\Inertia;
 use Rap2hpoutre\FastExcel\FastExcel;
 use Barryvdh\DomPDF\Facade\Pdf;
 use App\Exports\OrdersExport;
-use CloudinaryLabs\CloudinaryLaravel\Facades\Cloudinary;
+use Cloudinary\Cloudinary as CloudinaryAPI;
 
 class OrderController extends Controller
 {
@@ -195,12 +195,27 @@ class OrderController extends Controller
                 // Validate file
                 if ($file->isValid()) {
                     try {
-                        // Try Cloudinary first
-                        $uploadedFile = Cloudinary::upload($file->getRealPath(), [
-                            'folder' => 'rovic-payment-proofs',
-                            'resource_type' => 'image'
+                        // Try Cloudinary first (using correct SDK method)
+                        $cloudinary = new CloudinaryAPI([
+                            'cloud' => [
+                                'cloud_name' => config('cloudinary.cloud_name'),
+                                'api_key' => config('cloudinary.api_key'),
+                                'api_secret' => config('cloudinary.api_secret'),
+                            ],
+                            'url' => [
+                                'secure' => true
+                            ]
                         ]);
-                        $paymentProofPath = $uploadedFile->getSecurePath();
+                        
+                        $uploadResult = $cloudinary->uploadApi()->upload(
+                            $file->getRealPath(),
+                            [
+                                'folder' => 'rovic-payment-proofs',
+                                'resource_type' => 'image'
+                            ]
+                        );
+                        
+                        $paymentProofPath = $uploadResult['secure_url'];
                         \Log::info('✅ Payment proof uploaded to Cloudinary', ['path' => $paymentProofPath]);
                     } catch (\Exception $cloudinaryError) {
                         \Log::warning('Cloudinary upload failed, using local storage', ['error' => $cloudinaryError->getMessage()]);
