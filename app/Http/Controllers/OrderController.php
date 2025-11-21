@@ -266,7 +266,7 @@ class OrderController extends Controller
                 'customer_phone' => $request->input('customer_phone', '09123456789'),
                 'customer_email' => $request->input('customer_email'),
                 'status' => Order::STATUS_PENDING,
-                'total_price' => $total > 0 ? $total : 100.00, // FIX: Use 'total_price' not 'total_amount'
+                'total_amount' => $total > 0 ? $total : 100.00, // REVERT: Production DB has 'total_amount'
                 'pickup_or_delivery' => $request->input('pickup_or_delivery', 'pickup'),
                 'payment_method' => $normalizedPaymentMethod,
                 'payment_status' => Order::PAYMENT_STATUS_PENDING,
