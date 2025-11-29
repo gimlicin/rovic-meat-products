@@ -1,8 +1,10 @@
-import React, { useEffect } from 'react';
-import { Head, Link, usePage } from '@inertiajs/react';
+import React, { useEffect, useState } from 'react';
+import { Head, Link, usePage, router } from '@inertiajs/react';
 import ShopFrontLayout from '@/layouts/shop-front-layout';
 import { Package, Clock, CheckCircle, XCircle, Eye, RotateCcw } from 'lucide-react';
 import { useNotifications } from '@/contexts/NotificationContext';
+import { Button } from '@/components/ui/button';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 
 interface OrderItem {
     id: number;
@@ -49,6 +51,29 @@ interface Props extends Record<string, any> {
 export default function CustomerOrdersIndex() {
     const { orders } = usePage<Props>().props;
     const { refreshNotifications } = useNotifications();
+    const [orderToCancel, setOrderToCancel] = useState<Order | null>(null);
+    const [isCancelDialogOpen, setIsCancelDialogOpen] = useState(false);
+    const [isCancelling, setIsCancelling] = useState(false);
+
+    const openCancelDialog = (order: Order) => {
+        setOrderToCancel(order);
+        setIsCancelDialogOpen(true);
+    };
+
+    const confirmCancelOrder = () => {
+        if (!orderToCancel || isCancelling) return;
+
+        setIsCancelling(true);
+
+        router.patch(`/orders/${orderToCancel.id}/cancel`, {}, {
+            preserveScroll: true,
+            onFinish: () => {
+                setIsCancelling(false);
+                setIsCancelDialogOpen(false);
+                setOrderToCancel(null);
+            },
+        });
+    };
 
     // Refresh notifications when the page loads
     useEffect(() => {
@@ -201,6 +226,16 @@ export default function CustomerOrdersIndex() {
                                                     <Eye className="w-4 h-4 mr-2" />
                                                     View Details
                                                 </Link>
+                                                {['pending', 'payment_submitted', 'payment_rejected'].includes(order.status) && (
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => openCancelDialog(order)}
+                                                        className="inline-flex items-center px-4 py-2 text-sm font-medium text-red-600 bg-white border border-red-300 rounded-lg hover:bg-red-50 transition-colors"
+                                                    >
+                                                        <XCircle className="w-4 h-4 mr-2" />
+                                                        Cancel Order
+                                                    </button>
+                                                )}
                                                 {order.status === 'completed' && (
                                                     <Link
                                                         href={`/orders/${order.id}/reorder`}
@@ -248,6 +283,49 @@ export default function CustomerOrdersIndex() {
                     )}
                 </div>
             </div>
+
+            <Dialog
+                open={isCancelDialogOpen}
+                onOpenChange={(open) => {
+                    setIsCancelDialogOpen(open);
+                    if (!open) {
+                        setOrderToCancel(null);
+                        setIsCancelling(false);
+                    }
+                }}
+            >
+                <DialogContent>
+                    <DialogHeader>
+                        <DialogTitle>Cancel Order</DialogTitle>
+                    </DialogHeader>
+                    <div className="space-y-3">
+                        <p className="text-sm text-gray-600">
+                            {orderToCancel
+                                ? `Are you sure you want to cancel Order #${orderToCancel.id}? This action cannot be undone.`
+                                : 'Are you sure you want to cancel this order? This action cannot be undone.'}
+                        </p>
+                        <div className="flex justify-end gap-2 pt-2">
+                            <Button
+                                variant="outline"
+                                onClick={() => {
+                                    setIsCancelDialogOpen(false);
+                                    setOrderToCancel(null);
+                                    setIsCancelling(false);
+                                }}
+                            >
+                                Keep Order
+                            </Button>
+                            <Button
+                                variant="destructive"
+                                onClick={confirmCancelOrder}
+                                disabled={isCancelling}
+                            >
+                                {isCancelling ? 'Cancelling…' : 'Cancel Order'}
+                            </Button>
+                        </div>
+                    </div>
+                </DialogContent>
+            </Dialog>
         </ShopFrontLayout>
     );
 }

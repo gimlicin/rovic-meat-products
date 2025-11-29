@@ -488,7 +488,12 @@ export default function Checkout({ cartItems, total }: CheckoutProps) {
                                     <Button
                                         type="submit"
                                         size="lg"
-                                        disabled={processing || (paymentMethod === 'qr' && !paymentProof)}
+                                        disabled={
+                                            processing ||
+                                            (paymentMethod === 'qr' && !paymentProof) ||
+                                            !data.customer_name.trim() ||
+                                            data.customer_phone.length !== 11
+                                        }
                                         className="px-8"
                                     >
                                         {processing ? 'Processing...' : 'Place Order'}
