@@ -713,21 +713,43 @@ export default function CheckoutSimple({ cartItems, total, paymentSettings = [] 
                                     type="submit"
                                     disabled={
                                         processing ||
+                                        // For non-cash payments, require proof + reference number
                                         ((data.payment_method !== 'cash' && data.payment_method !== null) && (!paymentProof || !data.payment_reference.trim())) ||
-                                        !data.terms_accepted
+                                        // Always require terms acceptance
+                                        !data.terms_accepted ||
+                                        // Require basic customer info
+                                        !data.customer_name.trim() ||
+                                        data.customer_phone.length !== 11 ||
+                                        // Require delivery address for home delivery
+                                        (data.pickup_or_delivery === 'delivery' && !data.delivery_address.trim())
                                     }
                                     className="w-full bg-red-600 text-white py-3 px-4 rounded-lg font-semibold hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed text-sm transition-colors shadow-md"
                                 >
                                     {processing ? '⏳ Processing Your Order...' : '🛒 Place Order'}
                                 </button>
                                 
-                                {(((data.payment_method !== 'cash' && (!paymentProof || !data.payment_reference.trim())) || !data.terms_accepted) && (
-                                    <div className="text-sm text-gray-500 text-center space-y-1">
-                                        {data.payment_method !== 'cash' && !paymentProof && <p>Please upload payment proof to continue</p>}
-                                        {data.payment_method !== 'cash' && paymentProof && !data.payment_reference.trim() && <p>Please enter the payment reference number to continue</p>}
-                                        {!data.terms_accepted && <p>Please accept the terms and conditions to continue</p>}
-                                    </div>
-                                ))}
+                                {(
+                                    (
+                                        (data.payment_method !== 'cash' && (!paymentProof || !data.payment_reference.trim())) ||
+                                        !data.terms_accepted ||
+                                        !data.customer_name.trim() ||
+                                        data.customer_phone.length !== 11 ||
+                                        (data.pickup_or_delivery === 'delivery' && !data.delivery_address.trim())
+                                    ) && (
+                                        <div className="text-sm text-gray-500 text-center space-y-1">
+                                            {!data.customer_name.trim() && <p>Please enter your full name to continue</p>}
+                                            {data.customer_phone.length !== 11 && <p>Please enter an 11-digit phone number to continue</p>}
+                                            {data.pickup_or_delivery === 'delivery' && !data.delivery_address.trim() && (
+                                                <p>Please provide your delivery address to continue</p>
+                                            )}
+                                            {data.payment_method !== 'cash' && !paymentProof && <p>Please upload payment proof to continue</p>}
+                                            {data.payment_method !== 'cash' && paymentProof && !data.payment_reference.trim() && (
+                                                <p>Please enter the payment reference number to continue</p>
+                                            )}
+                                            {!data.terms_accepted && <p>Please accept the terms and conditions to continue</p>}
+                                        </div>
+                                    )
+                                )}
                             </form>
                         </div>
                     </div>

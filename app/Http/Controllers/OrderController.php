@@ -26,6 +26,7 @@ use Rap2hpoutre\FastExcel\FastExcel;
 use Barryvdh\DomPDF\Facade\Pdf;
 use App\Exports\OrdersExport;
 use Cloudinary\Cloudinary as CloudinaryAPI;
+use Illuminate\Validation\ValidationException;
 
 class OrderController extends Controller
 {
@@ -220,25 +221,47 @@ class OrderController extends Controller
         ]);
         
         // Skip complex validation - use basic checks
-        \Log::info('✅ Using basic validation');
+        \Log::info('\u2705 Using basic validation');
         
         $cartItems = $request->input('cart_items', []);
         if (empty($cartItems)) {
-            \Log::error('❌ No cart items provided');
+            \Log::error('\u274c No cart items provided');
             return redirect()->back()->withErrors(['cart' => 'No items in cart'])->withInput();
         }
 
         // Basic customer validation (keep it simple but strict on phone number and delivery address)
-        $request->validate([
-            'customer_name' => ['required', 'string', 'max:255'],
-            'customer_phone' => ['required', 'digits:11'],
-            'delivery_address' => ['required_if:pickup_or_delivery,delivery', 'string', 'max:1000'],
-        ], [
-            'customer_name.required' => 'Customer name is required.',
-            'customer_phone.required' => 'Phone number is required.',
-            'customer_phone.digits' => 'Phone number must be exactly 11 digits.',
-            'delivery_address.required_if' => 'Delivery address is required for home delivery.',
-        ]);
+        try {
+            $request->validate([
+                'customer_name' => ['required', 'string', 'max:255'],
+                'customer_phone' => ['required', 'digits:11'],
+                // For pickup orders, delivery_address can be null/empty.
+                // For delivery orders, it becomes required and must be a string.
+                'delivery_address' => ['nullable', 'required_if:pickup_or_delivery,delivery', 'string', 'max:1000'],
+            ], [
+                'customer_name.required' => 'Customer name is required.',
+                'customer_phone.required' => 'Phone number is required.',
+                'customer_phone.digits' => 'Phone number must be exactly 11 digits.',
+                'delivery_address.required_if' => 'Delivery address is required for home delivery.',
+            ]);
+
+            \Log::info('✅ Customer validation passed', [
+                'customer_name' => $request->input('customer_name'),
+                'customer_phone' => $request->input('customer_phone'),
+                'pickup_or_delivery' => $request->input('pickup_or_delivery'),
+            ]);
+        } catch (ValidationException $e) {
+            \Log::warning('❌ Customer validation failed', [
+                'errors' => $e->errors(),
+                'input' => $request->only([
+                    'customer_name',
+                    'customer_phone',
+                    'pickup_or_delivery',
+                    'delivery_address',
+                ]),
+            ]);
+
+            throw $e;
+        }
 
         // Test database connection
         try {
