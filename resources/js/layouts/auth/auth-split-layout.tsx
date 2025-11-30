@@ -22,23 +22,12 @@ export default function AuthSplitLayout({ children, title, description }: PropsW
                     {name}
                 </Link>
                 <div className="relative z-20 mt-16 flex flex-1 items-center justify-center">
-                    <div className="relative">
+                    <div className="relative flex items-center justify-center rounded-full bg-linear-to-br from-zinc-900 via-black to-zinc-950 shadow-[0_0_80px_rgba(0,0,0,0.9)] h-72 w-72 sm:h-80 sm:w-80 md:h-88 md:w-88 lg:h-88 lg:w-88">
+                        <div className="pointer-events-none absolute inset-0 rounded-full ring-1 ring-zinc-700/60" />
                         <img
                             src="/images/rovic-logo.png"
                             alt={name}
-                            className="relative z-10 h-52 w-52 sm:h-64 sm:w-64 md:h-72 md:w-72 lg:h-80 lg:w-80 object-contain drop-shadow-2xl"
-                            style={{
-                                filter: 'drop-shadow(0 0 45px rgba(0,0,0,0.85))',
-                            }}
-                        />
-                        <div
-                            className="pointer-events-none absolute"
-                            style={{
-                                inset: '-56px',
-                                borderRadius: '9999px',
-                                background:
-                                    'radial-gradient(circle at center, rgba(0,0,0,0) 0%, rgba(0,0,0,0.9) 70%)',
-                            }}
+                            className="relative z-10 h-52 w-52 sm:h-60 sm:w-60 md:h-64 md:w-64 lg:h-72 lg:w-72 object-contain"
                         />
                     </div>
                 </div>
