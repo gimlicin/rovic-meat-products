@@ -17,6 +17,16 @@ type RegisterForm = {
     password_confirmation: string;
 };
 
+const formatPasswordError = (message?: string) => {
+    if (!message) return message;
+
+    if (message.includes('has appeared in a data leak')) {
+        return 'Please try a different password for your security.';
+    }
+
+    return message;
+};
+
 export default function Register() {
     const { data, setData, post, processing, errors, reset } = useForm<Required<RegisterForm>>({
         name: '',
@@ -86,7 +96,7 @@ export default function Register() {
                         <p className="text-xs text-muted-foreground">
                             Minimum 8 characters with uppercase, lowercase, and numbers
                         </p>
-                        <InputError message={errors.password} />
+                        <InputError message={formatPasswordError(errors.password)} />
                     </div>
 
                     <div className="grid gap-2">
