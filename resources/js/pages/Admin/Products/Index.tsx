@@ -6,6 +6,16 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 
 interface Product {
   id: number;
@@ -65,6 +75,9 @@ function ProductsIndex({ products, stats, filters }: Props) {
     reason: ''
   });
 
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [productToDelete, setProductToDelete] = useState<Product | null>(null);
+
   const activeStockFilter = filters?.stock_filter || 'all';
 
   const formatCurrency = (amount: number) => {
@@ -81,7 +94,7 @@ function ProductsIndex({ products, stats, filters }: Props) {
     if (product.stock_quantity === 0) {
       return <Badge variant="secondary">Out of Stock</Badge>;
     }
-    const threshold = product.low_stock_threshold || 5;
+    const threshold = product.low_stock_threshold || 15;
     if (product.stock_quantity <= threshold) {
       return <Badge variant="outline" className="text-orange-600 border-orange-600">Low Stock</Badge>;
     }
@@ -117,10 +130,21 @@ function ProductsIndex({ products, stats, filters }: Props) {
     });
   };
 
-  const deleteProduct = (productId: number, productName: string) => {
-    if (confirm(`Delete product "${productName}"? This action cannot be undone.`)) {
-      router.delete(`/admin/products/${productId}`);
-    }
+  const openDeleteProductDialog = (product: Product) => {
+    setProductToDelete(product);
+    setDeleteDialogOpen(true);
+  };
+
+  const handleConfirmDeleteProduct = () => {
+    if (!productToDelete) return;
+
+    router.delete(`/admin/products/${productToDelete.id}`, {
+      preserveScroll: true,
+      onFinish: () => {
+        setDeleteDialogOpen(false);
+        setProductToDelete(null);
+      },
+    });
   };
 
   const openStockAdjustModal = (product: Product) => {
@@ -329,7 +353,7 @@ function ProductsIndex({ products, stats, filters }: Props) {
                         <Button
                           variant="ghost"
                           size="sm"
-                          onClick={() => deleteProduct(product.id, product.name)}
+                          onClick={() => openDeleteProductDialog(product)}
                         >
                           <Trash2 className="h-4 w-4 text-red-600" />
                         </Button>
@@ -455,6 +479,37 @@ function ProductsIndex({ products, stats, filters }: Props) {
             </div>
           </div>
         )}
+
+        {/* Delete Product Confirmation Dialog */}
+        <AlertDialog
+          open={deleteDialogOpen}
+          onOpenChange={(open) => {
+            setDeleteDialogOpen(open);
+            if (!open) {
+              setProductToDelete(null);
+            }
+          }}
+        >
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Delete Product</AlertDialogTitle>
+              <AlertDialogDescription>
+                {productToDelete
+                  ? `Are you sure you want to delete product "${productToDelete.name}"? This action cannot be undone.`
+                  : 'This action cannot be undone.'}
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Cancel</AlertDialogCancel>
+              <AlertDialogAction
+                onClick={handleConfirmDeleteProduct}
+                className="bg-red-600 text-white hover:bg-red-700"
+              >
+                Delete Product
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       </div>
     </>
   );

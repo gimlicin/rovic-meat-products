@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Head, Link, router } from '@inertiajs/react';
 import { Package, FolderOpen, Plus, Edit, Trash2, ToggleLeft, ToggleRight } from 'lucide-react';
 import AppLayout from '@/layouts/app-layout';
@@ -6,6 +6,16 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 
 interface Category {
   id: number;
@@ -36,16 +46,30 @@ interface Props {
 }
 
 function CategoriesIndex({ categories, stats }: Props) {
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [categoryToDelete, setCategoryToDelete] = useState<Category | null>(null);
+
   const toggleActive = (categoryId: number) => {
     router.patch(`/admin/categories/${categoryId}/toggle-active`, {}, {
       preserveScroll: true,
     });
   };
 
-  const deleteCategory = (categoryId: number, categoryName: string) => {
-    if (confirm(`Are you sure you want to delete "${categoryName}"?`)) {
-      router.delete(`/admin/categories/${categoryId}`);
-    }
+  const openDeleteCategoryDialog = (category: Category) => {
+    setCategoryToDelete(category);
+    setDeleteDialogOpen(true);
+  };
+
+  const handleConfirmDeleteCategory = () => {
+    if (!categoryToDelete) return;
+
+    router.delete(`/admin/categories/${categoryToDelete.id}`, {
+      preserveScroll: true,
+      onFinish: () => {
+        setDeleteDialogOpen(false);
+        setCategoryToDelete(null);
+      },
+    });
   };
 
   return (
@@ -161,7 +185,7 @@ function CategoriesIndex({ categories, stats }: Props) {
                         <Button
                           variant="ghost"
                           size="sm"
-                          onClick={() => deleteCategory(category.id, category.name)}
+                          onClick={() => openDeleteCategoryDialog(category)}
                           disabled={category.products_count > 0}
                         >
                           <Trash2 className="h-4 w-4 text-red-600" />
@@ -184,6 +208,37 @@ function CategoriesIndex({ categories, stats }: Props) {
             </div>
           </CardContent>
         </Card>
+
+        {/* Delete Category Confirmation Dialog */}
+        <AlertDialog
+          open={deleteDialogOpen}
+          onOpenChange={(open) => {
+            setDeleteDialogOpen(open);
+            if (!open) {
+              setCategoryToDelete(null);
+            }
+          }}
+        >
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Delete Category</AlertDialogTitle>
+              <AlertDialogDescription>
+                {categoryToDelete
+                  ? `Are you sure you want to delete category "${categoryToDelete.name}"? This action cannot be undone.`
+                  : 'This action cannot be undone.'}
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Cancel</AlertDialogCancel>
+              <AlertDialogAction
+                onClick={handleConfirmDeleteCategory}
+                className="bg-red-600 text-white hover:bg-red-700"
+              >
+                Delete Category
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       </div>
     </>
   );
