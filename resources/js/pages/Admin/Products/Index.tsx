@@ -179,12 +179,12 @@ function ProductsIndex({ products, stats, filters }: Props) {
             <p className="text-muted-foreground">Manage your product inventory</p>
           </div>
           <div className="flex space-x-2">
-            <Button variant="outline" asChild>
+            {/* <Button variant="outline" asChild>
               <Link href="/admin/products/low-stock">
                 <AlertTriangle className="mr-2 h-4 w-4" />
                 Low Stock
               </Link>
-            </Button>
+            </Button> */}
             <Button asChild>
               <Link href="/admin/products/create">
                 <Plus className="mr-2 h-4 w-4" />
