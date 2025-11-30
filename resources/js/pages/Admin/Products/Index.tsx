@@ -118,7 +118,7 @@ function ProductsIndex({ products, stats, filters }: Props) {
   };
 
   const deleteProduct = (productId: number, productName: string) => {
-    if (confirm(`Are you sure you want to delete "${productName}"?`)) {
+    if (confirm(`Delete product "${productName}"? This action cannot be undone.`)) {
       router.delete(`/admin/products/${productId}`);
     }
   };
