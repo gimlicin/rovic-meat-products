@@ -2,6 +2,10 @@ import { type SharedData } from '@/types';
 import { Link, usePage } from '@inertiajs/react';
 import { type PropsWithChildren } from 'react';
 
+const route =
+    (typeof window !== 'undefined' && (window as any).route) ||
+    ((name: string, params?: any, absolute?: boolean) => name);
+
 interface AuthLayoutProps {
     title?: string;
     description?: string;
@@ -22,7 +26,7 @@ export default function AuthSplitLayout({ children, title, description }: PropsW
                         <img
                             src="/images/rovic-logo.png"
                             alt={name}
-                            className="relative z-10 max-h-64 w-auto object-contain drop-shadow-2xl"
+                            className="relative z-10 h-52 w-52 sm:h-64 sm:w-64 md:h-72 md:w-72 lg:h-80 lg:w-80 object-contain drop-shadow-2xl"
                             style={{
                                 filter: 'drop-shadow(0 0 45px rgba(0,0,0,0.85))',
                             }}
@@ -30,7 +34,7 @@ export default function AuthSplitLayout({ children, title, description }: PropsW
                         <div
                             className="pointer-events-none absolute"
                             style={{
-                                inset: '-40px',
+                                inset: '-56px',
                                 borderRadius: '9999px',
                                 background:
                                     'radial-gradient(circle at center, rgba(0,0,0,0) 0%, rgba(0,0,0,0.9) 70%)',
