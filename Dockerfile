@@ -66,9 +66,9 @@ RUN echo "catch_workers_output = yes" >> /usr/local/etc/php-fpm.d/www.conf && \
     echo "php_admin_flag[log_errors] = on" >> /usr/local/etc/php-fpm.d/www.conf && \
     echo "php_admin_value[error_log] = /proc/self/fd/2" >> /usr/local/etc/php-fpm.d/www.conf
 
-# Create database setup script
+# Create database setup script (runs against default SQLite connection)
 RUN echo '#!/bin/bash\n\
-echo "Setting up database..."\n\
+echo "Setting up database (SQLite)..."\n\
 php artisan migrate --force || echo "Migration failed, continuing..."\n\
 php artisan db:seed --force || echo "Seeding failed, continuing..."\n\
 php artisan storage:link || echo "Storage link failed, continuing..."\n\
@@ -76,6 +76,9 @@ php artisan config:clear || echo "Config clear failed, continuing..."\n\
 php artisan config:cache || echo "Config cache failed, continuing..."\n\
 echo "Database setup completed"\n\
 ' > /var/www/html/setup-db.sh && chmod +x /var/www/html/setup-db.sh
+
+# Run database setup during build so the image ships with seeded data
+RUN ./setup-db.sh || echo "Database setup script failed during build"
 
 # Set permissions
 RUN chown -R www-data:www-data /var/www/html \
