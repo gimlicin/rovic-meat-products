@@ -15,6 +15,9 @@ services:
       php artisan key:generate --force --no-interaction
       php artisan view:cache --no-interaction
     startCommand: php artisan serve --host=0.0.0.0 --port=$PORT
+    postdeploy: |
+      php artisan migrate --force --no-interaction
+      php artisan db:seed --force --no-interaction
     envVars:
       - key: APP_ENV
         value: production
